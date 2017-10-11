@@ -1,0 +1,24 @@
+.jspsych-display-element {
+	justify-content: center;
+	align-items: center;
+	width: auto;
+	display: flex;
+	margin: auto;
+	flex-direction: column;
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	height: 100%;
+}
+
+img {
+	height: 60%;
+}
+
+.big-font {
+	font-size: 24pt;
+}
