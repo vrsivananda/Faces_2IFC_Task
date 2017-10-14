@@ -278,35 +278,35 @@ function make_practice_trial(data_type, trial_number) {
 
 function judgment_prompt_1(trial_type, trial_number) {
   return {
-  prompt: "Is the first face happy or fearful?",
-  choices: ['f','h'],
-  is_html: true,
-  stimulus: "",
-  data: {type: trial_type, trial: trial_number},
-  timing_response: 4000,
-}
+    prompt: "Is the first face happy or fearful?",
+    choices: ['f','h'],
+    is_html: true,
+    stimulus: "",
+    data: {type: trial_type, trial: trial_number},
+    timing_response: 4000,
+  }
 };
 
 function judgment_prompt_2(trial_type, trial_number) {
   return {
-  prompt: "Is the second face happy or fearful?",
-  choices: ['f','h'],
-  is_html: true,
-  stimulus: "",
-  data: {type: trial_type, trial: trial_number},
-  timing_response: 4000,
-}
+    prompt: "Is the second face happy or fearful?",
+    choices: ['f','h'],
+    is_html: true,
+    stimulus: "",
+    data: {type: trial_type, trial: trial_number},
+    timing_response: 4000,
+  }
 };
 
 function confident_prompt(trial_type, trial_number) {
   return{
-  prompt: "Which answer do you feel more confident in?",
-  choices: ['1', '2'],
-  is_html: true,
-  stimulus: "",
-  data: {type: trial_type, trial: trial_number},
-  timing_response: 4000,
-}
+    prompt: "Which answer do you feel more confident in?",
+    choices: ['1', '2'],
+    is_html: true,
+    stimulus: "",
+    data: {type: trial_type, trial: trial_number},
+    timing_response: 4000,
+  }
 };
 
 // Get the data...
