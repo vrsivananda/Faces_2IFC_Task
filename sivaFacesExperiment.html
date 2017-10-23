@@ -32,7 +32,7 @@
         var sampleFrameTime = 1000; //How long the sample images are displayed for in ms
         var realTrialsPresentationTime =  500; //How long to present the stimulus for in real trials in ms
         var practiceTrialsPresentationTime = 1000; //How long to present the stimulus for in practice trials in ms
-        var timeForResponse = 4000; //How long to wait for the subject to give a response
+        var timeForResponse = 6000; //How long to wait for the subject to give a response
         var fixationCrossTime = 1000; //How long the fixation cross will be displayed on the screen
 
         //Other variables
@@ -217,9 +217,11 @@
         function makePracticeTrialsPrompt(){
           return {
             type: 'text',
-            text: '<p> This is a short practice session that will be exactly like the actual task.</p>' + 
+            text: `<div style="max-width:${maxWidth}px;">` +
+            '<p> This is a short practice session that will be exactly like the actual task.</p>' + 
             '<p> Always keep your focus on the cross at the center of the screen. </p>' +
-            '<p>Press any key to begin.</p>'
+            '<p>Press any key to begin.</p>' +
+            '</div>'
           };
         }
         
@@ -227,10 +229,12 @@
         function makeHardPracticeTrialsPrompt(){
           return {
             type: 'text',
-            text: '<p> Great work! Those were the easy practice trials. Some of the trials will be more difficult as their emotions are not as obvious.</p>' + 
+            text: `<div style="max-width:${maxWidth}px;">` +
+            '<p> Great work! Those were the easy practice trials. Some of the trials will be more difficult as their emotions are not as obvious.</p>' + 
             '<p> Here are a few more difficult practice trials to get your more familiar with the more difficult trials. </p>' + 
             '<p> Remember to always keep your focus on the cross at the center of the screen. </p>' +
-            '<p>Press any key to begin.</p>'
+            '<p>Press any key to begin.</p>' +
+            '</div>'
           };
         }
         
@@ -238,9 +242,11 @@
         function makeRealTrialsPrompt(){
           return {
             type: 'text',
-            text: '<p> Well done with the practices! You are now ready to begin the actual experiment. </p>' + 
+            text: `<div style="max-width:${maxWidth}px;">` +
+            '<p> Well done with the practices! You are now ready to begin the actual experiment. </p>' + 
             '<p>In the actual experiment, the faces and prompts will appear exactly like those in the practice trials. However, the faces will be presented for a shorter duration, so it will be slightly more difficult. If you are unsure of your choices, just make your best guess!</p>' + 
-            '<p>Press any key to begin the actual experiment. </p>'
+            '<p>Press any key to begin the actual experiment. </p>' +
+            '</div>'
           };
         }
         
@@ -248,9 +254,11 @@
         function makeDebriefPrompt(){
           return {
             type: 'text',
-            text: '<p>Great job! You are now done with the experiment.</p>' + 
+            text: `<div style="max-width:${maxWidth}px;">` +
+            '<p>Great job! You are now done with the experiment.</p>' + 
             '<p>Thank you for participating in our experiment. Your participation will contribute to a greater understanding of the human visual system.</p>' + 
-            '<p>***Important: <strong>Please press any key to officially end the experiment.</strong></p>'
+            '<p>***Important: <strong>Please press any key to officially end the experiment.</strong></p>' +
+            '</div>'
           };
         }
         
@@ -651,10 +659,17 @@
         
         //Function to make the confidence question
         function makeConfidencePrompt(targetOrder, emotion, trialNumber, tag, trialType){
+          
+            var prompt = `<div style="max-width:${maxWidth}px; text-align:center;">` +
+            "<p>Which answer do you feel more confident in?</p>" + 
+            "<p><br/>If <strong>first</strong>, press <strong>1</strong>.</p>" + 
+            "<p>If <strong>second</strong>, press <strong>2</strong></p>" + 
+            "</div>";
+          
             return {
                 type: 'single-stim',
                 stimulus: "",
-                prompt: 'Which answer do you feel more confident in?',
+                prompt: prompt,
                 is_html: true,
                 timing_response: timeForResponse,
                 choices: [firstKey, secondKey],
@@ -703,7 +718,11 @@
                 inquiryNumber = "second";
             }
             
-            var prompt = "Is the " + inquiryNumber + " face happy or fearful?";
+            var prompt = `<div style="max-width:${maxWidth}px; text-align:center;">` +
+            `<p>Is the <strong> ${inquiryNumber} </strong> face happy or fearful?</p>` + 
+            "<p><br/>If <strong>fearful</strong>, press <strong>F</strong>.</p>" + 
+            "<p>If <strong>happy</strong>, press <strong>H</strong></p>" + 
+            "</div>";
             
             return {
                 type: 'single-stim',
