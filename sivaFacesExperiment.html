@@ -8,7 +8,7 @@
         <script src="jspsych-5.0.3/plugins/jspsych-single-stim.js"></script>
         <script src="jspsych-5.0.3/plugins/jspsych-multi-stim-multi-response.js"></script>
         <script src="jspsych-5.0.3/plugins/jspsych-categorize-animation.js"></script>
-        <script src="faces.js"></script>
+        <script src="sivaFaces.js"></script>
         <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
         <link href="jsscenter.css" rel="stylesheet" type="text/css"></link>
     </head>
@@ -22,14 +22,16 @@
         //-------------------------------//
 
         //Trial parameters
-        var nPracticeTrials = 4; //Must be a multiple of 4 to be counterbalanced properly
+        var nEasyPracticeTrials = 4; //Must be a multiple of 4 to be counterbalanced properly
+        var nHardPracticeTrials = 4; //Must be a multiple of 4 to be counterbalanced properly
         var nRealTrials = 4; //Must be a multiple of 4 to be counterbalanced properly
 
         //Timing variables
         var minPostTrialGap = 500; //Minimum gap after a trial in ms
         var maxPostTrialGap = 1500; //Maximum gap after a trial in ms
         var sampleFrameTime = 1000; //How long the sample images are displayed for in ms
-        var realPresentationTime =  500; //How long to present the stimulus for in ms
+        var realTrialsPresentationTime =  500; //How long to present the stimulus for in real trials in ms
+        var practiceTrialsPresentationTime = 1000; //How long to present the stimulus for in practice trials in ms
         var timeForResponse = 4000; //How long to wait for the subject to give a response
         var fixationCrossTime = 1000; //How long the fixation cross will be displayed on the screen
 
@@ -39,10 +41,16 @@
         var firstKey = key('1');
         var secondKey = key('2');
         
+        //Styling variables
+        var maxWidth = 800;//How wide the instruction words can go in pixels
+        
           //-----------------------------//
          //-------Parameters End--------//
         //-----------------------------//
-
+        
+        //Global variables to store the judgmentPrompt values, to be updated in the on_finish of the judgment prompt trials
+        var confidencePromptCorrectness = "N/A";
+        
         //Create a variable that stores all the faces in a map structure for easy accessibility
         var faceMap = {}; //faceMap can be accessed like this: faceMap["H"]["01"], which returns an array
         
@@ -59,8 +67,14 @@
         //Make the prompt for practice
         var practiceTrialsPrompt = makePracticeTrialsPrompt();
         
-        //Make the array of practice trials
-        var practiceTrialsBlock = makeTrials("practice");
+        //Make the array of easy practice trials
+        var easyPracticeTrialsBlock = makeTrials("practice", "easy");
+        
+        //Make the prompt for the hard practice trials
+        var hardPracticeTrialsPrompt = makeHardPracticeTrialsPrompt();
+        
+        //Make the array of hard practice trials
+        var hardPracticeTrialsBlock = makeTrials("practice", "hard");
         
         //Make the prompt for the real trials
         var realTrialsPrompt = makeRealTrialsPrompt()
@@ -68,16 +82,20 @@
         //Make the array of real trials
         var realTrialsBlock = makeTrials("real");
         
-        
+        //Make the prompt for the debrief
+        var debriefPrompt = makeDebriefPrompt();
 
         //The timeline for the main experiment
         var timeline = []
         timeline.push(instructionsBlock);
         timeline.push(exampleBlock);
         timeline.push(practiceTrialsPrompt);
-        timeline.push(practiceTrialsBlock);
+        timeline.push(easyPracticeTrialsBlock);
+        timeline.push(hardPracticeTrialsPrompt);
+        timeline.push(hardPracticeTrialsBlock);
         timeline.push(realTrialsPrompt);
         timeline.push(realTrialsBlock);
+        timeline.push(debriefPrompt);
         
         console.log("timeline:");
         console.log(timeline);
@@ -133,41 +151,55 @@
               faceMap[face.category][face.person].push(face.image_file);
             }
         }
+        
+        //------Text-making functions-------
 
         //Function that makes the instructions for the experiment
         function makeInstructions(){
             
-            var welcomeText = 'Welcome to the experiment! Please maximize the window you currently have open. When you are ready, press any key to begin.';
+            var welcomeText = `<div style="max-width:${maxWidth}px;">` +
+            '<p>Welcome to the experiment!</p>' + 
+            '<p>To ensure proper presentation of images, <strong>please maximize the current window.</strong></p>' + 
+            '<p>When you are ready, press any key to begin.</p>' + 
+            '</div>';
 
-            var instructionsText1 = '<div>' +
-              '<p>In this experiment, two faces will flash briefly at the center ' +
-              'of the screen, one after the other.</p>'+
-              '<p> You will then be asked to judge if the faces were happy or fearful.' +
-              '<p>If the face was a <strong>happy</strong> face, ' +
-              'press the letter H on the keyboard.</p>' +
-              '<p>If the face was a <strong>fearful</strong> face, press ' +
-              'the letter F on the keyboard.</p>' +
+            var instructionsText1 = `<div style="max-width:${maxWidth}px;">` +
+            '<p>In this experiment, a fixation cross will appear in the middle of the screen. Shortly after, a face will be presented briefly. Then a second fixation cross will appear, and a second face will be presented briefly.</p>' +
+              '<p> You will then be asked to judge each of the two faces on whether they were happy or fearful faces.</p>' +
+              '<p>If the face was a <strong>fearful</strong> face, press the letter <strong>F</strong> on the keyboard.</p>' +
+              '<p>If the face was a <strong>happy</strong> face, press the letter <strong>H</strong> on the keyboard.</p>' +
               "<div class='left center-content'><img src='img/F01_100.png'></img>" +
               "<p class='small'><strong>Press the F key</strong></p></div>" +
               "<div class='right center-content'><img src='img/H01_100.png'></img>" +
               "<p class='small'><strong> Press the H key</strong></p></div>" +
-              "<p>Press any key to continue.</p>" +
-              '</div>';
+              "<p><br/>Press any key to continue.</p>" + 
+              '<div>';
 
-            var instructionsText2 = '<div>' +
-              '<p> Prior to judging whether the faces were happy or fearful, you will be asked to rate '+
-              'which response you feel more confident in. If you feel that you are more confident in your first response, ' +
-              'press <strong>1</strong>.</p>' +
-              '<p> If you feel more confident in your second response, press <strong>2</strong>.</p>' +
-              '<p> To reiterate the steps in the experiment:</p>' +
+            var instructionsText2 =  `<div style="max-width:${maxWidth}px;">` +
+              '<p> Prior to judging whether the faces were happy or fearful, you will be asked to rate which response you feel more confident in.</p>' + 
+              '<p>If you feel that you are more confident in your response to the face that was presented <i>first</i>, press <strong>1</strong>.</p>' +
+              '<p> If you feel more confident in your response to the face that was presented <i>second</i>, press <strong>2</strong>.<br/></p>' +
+              '<p> <br/> Press any key to continue.</p>' +
+              '</div>';
+              
+            var instructionsText3 =  `<div style="max-width:${maxWidth}px;">` +
+              '<p> <u>To reiterate the steps in the experiment:</u></p>' +
               '<p> 1. Look at the cross and wait for the faces to appear, one after the other.</p>'+
               '<p> 2. Rate which face judgment you feel more confident in.</p>' +
-              '<p> 3. Indicate if the first face was happy or fearful, and if the second face was happy or fearful.</p>' +
-              '<p> Press any key to continue</p>' +
+              '<p> 3. Indicate if the first face was happy or fearful.</p>' +
+              '<p> 4. Indicate if the second face was happy or fearful. </p>' +
+              '<p> <br/> Press any key to continue.</p>' +
               '</div>';
 
-            var instructionsText3 = '<div>' +
-              '<p> One last thing, the pairing of the faces may be: </p><p> 1. "happy & happy" </p><p> 2. "fearful & fearful" </p><p> 3. "happy & fearful" </p><p> 4. "fearful & happy".  </p>';
+            var instructionsText4 =  `<div style="max-width:${maxWidth}px;">` +
+              '<p> There are four possible combinations of faces, and they will be randomly presented.</p>' +
+              '<p> <br/> <u> Here are the four possible combinations: </u> </p>' +
+              '<p> 1. happy & happy </p>' + 
+              '<p> 2. fearful & fearful </p>' + 
+              '<p> 3. happy & fearful </p>' + 
+              '<p> 4. fearful & happy  </p>' +
+              '<p> <br/> Press any key to continue.</p>' +
+              '</div>';
 
             return {
                 type: 'text',
@@ -175,33 +207,55 @@
                     {text: welcomeText},
                     {text: instructionsText1},
                     {text: instructionsText2},
-                    {text: instructionsText3}
+                    {text: instructionsText3},
+                    {text: instructionsText4}
                 ]
             };
         }//End of makeInstructions()
-        
-        
-        //Function to make the prompt before the real trials
-        function makeRealTrialsPrompt(){
-          return {
-            type: 'text',
-            text: '<p> This is the real experiment.</p>' + 
-            '<p>press any button to begin. </p>'
-          };
-        }
         
         //Function to make prompt before the practice trials
         function makePracticeTrialsPrompt(){
           return {
             type: 'text',
             text: '<p> This is a short practice session that will be exactly like the actual task.</p>' + 
-            '<p> Always keep your focus on the cross at the center of the screen. </p>' + 
+            '<p> Always keep your focus on the cross at the center of the screen. </p>' +
             '<p>Press any key to begin.</p>'
           };
         }
-
         
-
+        //Function to make prompt before the hard practice trials
+        function makeHardPracticeTrialsPrompt(){
+          return {
+            type: 'text',
+            text: '<p> Great work! Those were the easy practice trials. Some of the trials will be more difficult as their emotions are not as obvious.</p>' + 
+            '<p> Here are a few more difficult practice trials to get your more familiar with the more difficult trials. </p>' + 
+            '<p> Remember to always keep your focus on the cross at the center of the screen. </p>' +
+            '<p>Press any key to begin.</p>'
+          };
+        }
+        
+        //Function to make the prompt before the real trials
+        function makeRealTrialsPrompt(){
+          return {
+            type: 'text',
+            text: '<p> Well done with the practices! You are now ready to begin the actual experiment. </p>' + 
+            '<p>In the actual experiment, the faces and prompts will appear exactly like those in the practice trials. However, the faces will be presented for a shorter duration, so it will be slightly more difficult. If you are unsure of your choices, just make your best guess!</p>' + 
+            '<p>Press any key to begin the actual experiment. </p>'
+          };
+        }
+        
+        //Function to make the prompt before the real trials
+        function makeDebriefPrompt(){
+          return {
+            type: 'text',
+            text: '<p>Great job! You are now done with the experiment.</p>' + 
+            '<p>Thank you for participating in our experiment. Your participation will contribute to a greater understanding of the human visual system.</p>' + 
+            '<p>***Important: <strong>Please press any key to officially end the experiment.</strong></p>'
+          };
+        }
+        
+         //------Trial-making functions-------
+        
         //Function to make the sample categorization
         function makeExampleBlock(){
 
@@ -264,21 +318,22 @@
                     exampleDebrief
                 ]
             };
-
-
         }//End of makeExampleBlock()
         
-        
         //Make a random permutation based on the number of trials
-        function makeTagArray(trialType){
+        function makeTagArray(trialType, difficultyLevel){
             
             //Set the correct number of trials
             if(trialType === "real"){
               var n = nRealTrials;
             }
-            else if(trialType == "practice"){
-              var n = nPracticeTrials;
+            else if(trialType === "practice" && difficultyLevel === "easy"){
+              var n = nEasyPracticeTrials;
             }
+            else if(trialType === "practice" && difficultyLevel === "hard"){
+              var n = nHardPracticeTrials;
+            }
+            
             
             //Check that the number of trials is divisible by 4
             if(n % 4 != 0){
@@ -303,20 +358,10 @@
             }
         }
         
-        function makeTrials(trialType){
-            
-            
-            var tagArray = makeTagArray(trialType);
-            
-        /*    //Set the number of trials based on whether this is a practice trial or real trial
-            if(trialType === "real"){
-              var tagArray = realTagArray;
-            }
-            else if(trialType === "practice"){
-              var tagArray = practiceTagArray;
-            }
-        */  
-          
+        function makeTrials(trialType, difficultyLevel = "N/A"){
+        	
+            //Make an array of the specified trial type
+            var tagArray = makeTagArray(trialType, difficultyLevel);
           
             //Declare a new array for the trials
             var outerArray = [];
@@ -340,8 +385,11 @@
                 var emotion = determineTargetEmotion(tag, tagArray.length);
                 
                 //Make the presentation pair
-                var presentationPair = makePresentationPair(targetOrder, emotion, i, tag, trialType);
-              
+                var presentationPair = makePresentationPair(targetOrder, emotion, i, tag, trialType, difficultyLevel);
+                
+                //Pass the emotion back out from the presentation pair to be passed into the making of judgment prompts
+                var emotion1 = presentationPair[0]["data"]["faceEmotion"];
+                var emotion2 = presentationPair[1]["data"]["faceEmotion"];
                 
                 //Push everything into the array
                 innerArray.push(fixationCross);
@@ -349,8 +397,8 @@
                 innerArray.push(fixationCross);
                 innerArray.push(presentationPair[1]);
                 innerArray.push(makeConfidencePrompt(targetOrder, emotion, i, tag, trialType));
-                innerArray.push(makeJudgmentPrompt(targetOrder, emotion, i, tag, trialType, 1));
-                innerArray.push(makeJudgmentPrompt(targetOrder, emotion, i, tag, trialType, 2));
+                innerArray.push(makeJudgmentPrompt(targetOrder, emotion, emotion1, emotion2, i, tag, trialType, 1));
+                innerArray.push(makeJudgmentPrompt(targetOrder, emotion, emotion1, emotion2, i, tag, trialType, 2));
                 
                 var currentTrialObject = {
                   timeline: innerArray
@@ -367,11 +415,10 @@
               type: 'single-stim',
               timeline: outerArray
             }
-            
         } //End of makeRealTrials
         
         //Function to make the pair of presentations within a trial
-        function makePresentationPair(targetOrder, emotion, trialNumber, tag, trialType){
+        function makePresentationPair(targetOrder, emotion, trialNumber, tag, trialType, difficultyLevel){
             
             //Go down the decision tree to determine what emotions are in the first and second presentations
             /*Binary decision tree levels: 
@@ -392,8 +439,11 @@
             if(trialType === "practice"){
               
               //Data: face type is practice
-              var faceType1 = "practice";
-              var faceType2 = "practice";
+              var faceType1 = "N/A";
+              var faceType2 = "N/A";
+              
+              //The presentation time is for practice trials
+              var presentationTime = practiceTrialsPresentationTime;
               
               //If the emotions are the same
               if(targetOrder === "same"){
@@ -441,7 +491,11 @@
               }
             }
             //Else if it is a real trial
-            if(trialType === "real"){
+            else if(trialType === "real"){
+              
+              //The presentation time is for real trials
+              var presentationTime = realTrialsPresentationTime;
+              
               //If the emotions are the same
               if(targetOrder === "first"){
                 
@@ -508,7 +562,7 @@
             //Flag to make sure that we don't choose the same person
             var samePerson = true;
             
-            //While loop to choose the neutral person, making sure that it is not the same as the emotion person
+            //While loop to choose the second person, making sure that it is not the same as the first person
             while(samePerson){
               
                 //Randomly pick the second person from list of the possible people people
@@ -520,18 +574,32 @@
                 }
             }
             
-            //Pick out the paths to the respective faces with a random intensity
-            var face1 = jsPsych.randomization.sample(faceMap[emotionIndex1][person1],1)[0];
-            var face2 = jsPsych.randomization.sample(faceMap[emotionIndex2][person2],1)[0];
+            //Pick out the face based on the difficulty level
+            if(difficultyLevel === "easy"){
+              var face1 = faceMap[emotionIndex1][person1]["1"]; //"1" corresponds to intensity 100 in the faceMap
+              var face2 = faceMap[emotionIndex2][person2]["1"]; //"1" corresponds to intensity 100 in the faceMap
+            }
+            else if(difficultyLevel === "hard"){
+              var face1 = faceMap[emotionIndex1][person1]["4"]; //"1" corresponds to intensity 25 in the faceMap
+              var face2 = faceMap[emotionIndex2][person2]["4"]; //"1" corresponds to intensity 25 in the faceMap
+            }
+            else if(difficultyLevel === "N/A"){
+              //Pick out the paths to the respective faces with a random intensity
+              var face1 = jsPsych.randomization.sample(faceMap[emotionIndex1][person1],1)[0];
+              var face2 = jsPsych.randomization.sample(faceMap[emotionIndex2][person2],1)[0];
+            }
             
-            //[Reminder] Might want to take into account the intensity. Currently unlogged except in the stimulus data
+            
+            //Record the intensity of each face
+            var intensity1 = face1.match(/([HFN])([0-9]+)_([0-9]+)/)[3];
+            var intensity2 = face2.match(/([HFN])([0-9]+)_([0-9]+)/)[3];
             
             //Make the first face object
             var faceObject1 = {
                 type: 'single-stim',
                 stimulus: face1,
-                timing_stim: realPresentationTime,
-                timing_response: realPresentationTime,
+                timing_stim: presentationTime,
+                timing_response: presentationTime,
                 response_ends_trial: false,
                 on_finish: function(data){
                   console.log(trialType);
@@ -546,7 +614,9 @@
                     trialType: trialType,
                     trialNumber: trialNumber,
                     tag: tag,
-                    targetOrder: targetOrder
+                    targetOrder: targetOrder,
+                    intensity: intensity1,
+                    difficulty: difficultyLevel
                 }
             }
             
@@ -554,8 +624,8 @@
             var faceObject2 = {
                 type: 'single-stim',
                 stimulus: face2,
-                timing_stim: realPresentationTime,
-                timing_response: realPresentationTime,
+                timing_stim: presentationTime,
+                timing_response: presentationTime,
                 response_ends_trial: false,
                 on_finish: function(data){
                   console.log(face2);
@@ -569,14 +639,14 @@
                     trialType: trialType,
                     trialNumber: trialNumber,
                     tag: tag,
-                    targetOrder: targetOrder
+                    targetOrder: targetOrder,
+                    intensity: intensity2,
+                    difficulty: difficultyLevel
                 }
             }
             
             //Return both of them in an array
-            return [faceObject1, faceObject2];
-            
-            
+            return [faceObject1, faceObject2]; 
         }//End of makePresentationPair
         
         //Function to make the confidence question
@@ -588,6 +658,27 @@
                 is_html: true,
                 timing_response: timeForResponse,
                 choices: [firstKey, secondKey],
+                on_finish(trialData){
+                	//If the subject bet on the correct decision, then add that to the data
+                	if( (targetOrder === "first" && trialData.key_press === firstKey) || (targetOrder === "second" && trialData.key_press === secondKey) ){
+                		confidencePromptCorrectness = "correct";
+                	}
+                	//Else if the this was a practice trial
+                	else if(trialData.trialType === "practice"){
+                		confidencePromptCorrectness = "N/A";
+                	}
+                  //Else if the subject did not respond
+                  else if(trialData.key_press === -1){
+                    confidencePromptCorrectness = "noResponse";
+                  }
+                	//Else it is wrong
+                	else{
+                		confidencePromptCorrectness = "incorrect";
+                	}
+                  
+                  //Add the data to the trial
+                  addData("confidenceJudgment", confidencePromptCorrectness);
+                },
                 data: {
                     trialEmotion: emotion,
                     trialType: trialType,
@@ -600,7 +691,7 @@
         }
         
         //Function to make the judgment prompt
-        function makeJudgmentPrompt(targetOrder, emotion, trialNumber, tag, trialType, judgmentNumber){
+        function makeJudgmentPrompt(targetOrder, emotion, emotion1, emotion2, trialNumber, tag, trialType, judgmentNumber){
             
             //Variable to hold the inquiryNumber
             var inquiryNumber;
@@ -621,12 +712,72 @@
                 is_html: true,
                 timing_response: timeForResponse,
                 choices: [happyKey, fearfulKey],
+                on_finish(trialData){
+                	//If it is asking about the first presentation
+                	if(inquiryNumber === "first"){
+                    
+                    //Declare the key of the property to be added to the data object
+                    var key = "judgment1";
+                    
+                		//And if the emotion presented matches up with the face, then save the data as correct
+                		if( (trialData.emotion1 === "happy" && trialData.key_press === happyKey) || (trialData.emotion1 === "fearful" && trialData.key_press === fearfulKey) ){
+                			var value = "correct";
+                		}
+                		//Else if the subject did not respond
+                		else if(trialData.key_press === -1){
+	                		//Save the data indicating that they did not respond
+                      var value = "noResponse";
+                		}
+                		//Else if it was neutral
+                		else if(trialData.emotion1 === "neutral"){
+                			//Save the data indicating that their responses are irrelevant
+                      var value = "N/A";
+                		}
+                		//Else it was wrong
+                		else{
+                      var value = "incorrect"
+                		}
+                	}
+                	//If it is asking about the second presentation
+                	else if(inquiryNumber === "second"){
+                    
+                    //Declare the key of the property to be added to the data object
+                    var key = "judgment2";
+                    
+                		//If the response was correct
+                		if( (trialData.emotion2 === "happy" && trialData.key_press === happyKey) || (trialData.emotion2 === "fearful" && trialData.key_press === fearfulKey) ){
+                      var value = "correct";
+                		}
+                		//Else if the subject did not respond
+                		else if(trialData.key_press === -1){
+                      var value = "noResponse";
+                		}
+                		//Else if it was neutral
+                		else if(trialData.emotion2 === "neutral"){
+                      var value = "N/A";
+                		}
+                		//Else it was wrong
+                		else{
+                      var value = "incorrect";
+                		}
+                	}//End of main if
+                  
+                  //Add the data of this trial to the object
+                  addData(key, value);
+                  
+                  //Add the data of the latest confidence trials to this judgment object
+                  addData("confidenceJudgment", confidencePromptCorrectness);
+                  
+                },//End of on_finish
                 data: {
-                    trialEmotion: emotion,
-                    trialType: trialType,
-                    trialNumber: trialNumber,
-                    tag: tag,
-                    targetOrder: targetOrder
+                	inquiryNumber: inquiryNumber,
+                  trialEmotion: emotion,
+                  emotion1: emotion1,
+                  emotion2: emotion2,
+                  trialType: trialType,
+                  trialNumber: trialNumber,
+                  tag: tag,
+                  targetOrder: targetOrder,
                 }
             };
         }//End of makeJudgmentPrompt
@@ -682,6 +833,13 @@
         function key(character) {
             return jsPsych.pluginAPI.convertKeyCharacterToKeyCode(character);
         };
+        
+        //Function to add the data to the trial
+        function addData(key, value){
+        	var dataObject = {};
+        	dataObject[key] = value; //Have to do it this way otherwise the key will be recorded as "key"
+        	jsPsych.data.addDataToLastTrial(dataObject);
+        }
         
         //Function that makes a fixation cross
         function makeFixationCross(){
