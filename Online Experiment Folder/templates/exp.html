@@ -32,11 +32,10 @@
     </body>
     <script>
     
-    
         //Data switches
         var psiTurkIsOn = 1; //Set this to zero if testing locally (without PsiTurk)
         var savingLocally = 0;
-        var displayOnScreen = 0;
+        var displayData = 0;
         var tableName = 'Faces_2IFC_Task';
         var folderName = 'Faces_2IFC_Task';
         
@@ -56,6 +55,7 @@
         var nHardPracticeTrials = 4; //Must be a multiple of 4 to be counterbalanced properly
         var nRealTrials = 100; //Must be a multiple of 4 to be counterbalanced properly
         var nBreaks = 2;
+        var validIntensitiesArray = [5,25,75,100];//The intensities of emotions for the experiment
 
         //Timing variables
         var minPostTrialGap = 500; //Minimum gap after a trial in ms
@@ -88,6 +88,9 @@
         //Fill in the faceMap
         createFaceMap();
         //console.log(faceMap);
+
+        //Variable to keep track of number of points
+        var pointsCounter = 0;
         
         //Make the instructions
         var instructionsBlock = makeInstructions();
@@ -254,6 +257,13 @@
               '<p> <br/> Press any key to continue.</p>' +
               '</div>';
 
+            var instructionsText5 =  `<div style="max-width:${maxWidth}px;">` +
+              '<p> <u> 2 final points: </u> </p>' +
+              '<p> <br/> (1) <b>Please use your right hand for the "F" and "H" keys and please use your left hand for the "1" and "2" keys.</b> The purpose of this arrangement is to make it most convenient for you to respond during the experiment and minimize delays. Please place your fingers on those keys now.</p>' +
+              '<p> <br/> (2) <b>You will get a point for each of the questions that you get correct.</b> In each trial, there will be 3 questions: 1 to bet on the interval, and 2 to bet on the emotion of the faces. If you bet on the easier interval, you get a point for the first question. If you guess the emotions of the faces correctly in the emotion questions, you get a point for each of those questions. In the end, all your points will be totaled up. If you get more points than the previous participant, you will receive a bonus payment of $1. </p>' + 
+              '<p> <br/> Press any key to continue.</p>' +
+              '</div>';
+
             return {
                 type: 'text',
                 timeline: [
@@ -261,7 +271,9 @@
                     {text: instructionsText1},
                     {text: instructionsText2},
                     {text: instructionsText3},
-                    {text: instructionsText4}
+                    {text: instructionsText4},
+                    {text: instructionsText5}
+
                 ]
             };
         }//End of makeInstructions()
@@ -310,8 +322,12 @@
             text: `<div style="max-width:${maxWidth}px;">` +
             '<p>Great job! You are now done with the experiment.</p>' + 
             '<p>Thank you for participating in our experiment. Your participation will contribute to a greater understanding of the human visual system.</p>' + 
+            `<p>Once we collect all the data, we will pay you the bonus if you did better than the previous participant.</p>` + 
             '<p>***Important: <strong>Please press any key to officially end the experiment.</strong></p>' +
-            '</div>'
+            '</div>',
+            on_finish(trialData){
+              addData("points",pointsCounter);
+            }
           };
         }
         
@@ -641,13 +657,13 @@
               var face2 = faceMap[emotionIndex2][person2]["1"]; //"1" corresponds to intensity 100 in the faceMap
             }
             else if(difficultyLevel === "hard"){
-              var face1 = faceMap[emotionIndex1][person1]["4"]; //"1" corresponds to intensity 25 in the faceMap
-              var face2 = faceMap[emotionIndex2][person2]["4"]; //"1" corresponds to intensity 25 in the faceMap
+              var face1 = faceMap[emotionIndex1][person1]["4"]; //"4" corresponds to intensity 25 in the faceMap
+              var face2 = faceMap[emotionIndex2][person2]["4"]; //"4" corresponds to intensity 25 in the faceMap
             }
             else if(difficultyLevel === "N/A"){
-              //Pick out the paths to the respective faces with a random intensity
-              var face1 = jsPsych.randomization.sample(faceMap[emotionIndex1][person1],1)[0];
-              var face2 = jsPsych.randomization.sample(faceMap[emotionIndex2][person2],1)[0];
+              //Pick out the paths to the respective faces with a random intensity out of valid intensities
+              var face1 = chooseFace(emotionIndex1, person1);
+              var face2 = chooseFace(emotionIndex2, person2)
             }
             
             
@@ -730,6 +746,12 @@
                 	//If the subject bet on the correct decision, then add that to the data
                 	if( (targetOrder === "first" && trialData.key_press === firstKey) || (targetOrder === "second" && trialData.key_press === secondKey) ){
                 		confidencePromptCorrectness = "correct";
+                    
+                    //If this is a real trial, increment the points counter
+                    if(trialData.trialType === "real"){
+                      pointsCounter++;
+                    }
+                    
                 	}
                 	//Else if the this was a practice trial
                 	else if(trialData.trialType === "practice"){
@@ -794,7 +816,13 @@
                 		//And if the emotion presented matches up with the face, then save the data as correct
                 		if( (trialData.emotion1 === "happy" && trialData.key_press === happyKey) || (trialData.emotion1 === "fearful" && trialData.key_press === fearfulKey) ){
                 			var value = "correct";
-                		}
+                      
+                      //If this is a real trial, increment the points counter
+                      if(trialData.trialType === "real"){
+                        pointsCounter++;
+                      }
+                		
+                    }
                 		//Else if the subject did not respond
                 		else if(trialData.key_press === -1){
 	                		//Save the data indicating that they did not respond
@@ -819,6 +847,12 @@
                 		//If the response was correct
                 		if( (trialData.emotion2 === "happy" && trialData.key_press === happyKey) || (trialData.emotion2 === "fearful" && trialData.key_press === fearfulKey) ){
                       var value = "correct";
+                      
+                      //If this is a real trial, increment the points counter
+                      if(trialData.trialType === "real"){
+                        pointsCounter++;
+                      }
+                        
                 		}
                 		//Else if the subject did not respond
                 		else if(trialData.key_press === -1){
@@ -894,6 +928,32 @@
         
         //---------Convenience Functions--------
         
+        //Function to choose the face
+        function chooseFace(emotionIndex, person){
+          
+          //Flag to see if the emotion is valid
+          var intensityIsInvalid = true;
+          
+          while(intensityIsInvalid){
+            
+            //Choose a face
+            var currentFace = jsPsych.randomization.sample(faceMap[emotionIndex][person],1)[0]
+            
+            //Get the intensity of the face
+            var currentIntensity = currentFace.match(/([HFN])([0-9]+)_([0-9]+)/)[3];
+            
+            //If the intensity of the face is within the valid intensities, then set the flag to false and break out of the while loop
+            if(validIntensitiesArray.includes(parseInt(currentIntensity)) || currentIntensity === '0'){
+              intensityIsInvalid = false;
+            }
+
+          }//End of while loop
+          
+          //Return the face
+          return currentFace;
+          
+        }//End of chooseFace
+        
         //Function to determine the order of targetPresentation
         function determineTargetOrder(tag, n, trialType){
             
@@ -939,7 +999,7 @@
         //Function to make get the key code from a char
         function key(character) {
             return jsPsych.pluginAPI.convertKeyCharacterToKeyCode(character);
-        };
+        }
         
         //Function to add the data to the trial
         function addData(key, value){
