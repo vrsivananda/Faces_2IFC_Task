@@ -8,16 +8,17 @@ javaaddpath('mysql-connector-java-5.1.42-bin.jar');
 
 
 % Create a connection object by connecting to our SQL database.
+databaseUsername = '';
+databasePassword = '';
 databaseName = '';
 tableName = '';
-databasePassword = '';
 serverAddess = '';
-conn = database('psych_qualia',databaseName,databasePassword,'Vendor','MySQL',...
+conn = database(databaseName,databaseUsername,databasePassword,'Vendor','MySQL',...
     'Server',serverAddess);
 
 
 % Load a text file that lists all of the subjects.
-path='Faces_2IFC_Task_Subjects_All.txt';
+path='Faces_2IFC_Task_Subjects_Round2.txt';
 % Make an ID for the subject list file
 subjectListFileId=fopen(path);
 % Read in the number from the subject list

@@ -1,6 +1,4 @@
-function targetDiscriminationData = getTargetDiscriminationData(dataStructure)
-
-intensities = [5,10,15,20,25,75,100];
+function targetDiscriminationData = getTargetDiscriminationData(dataStructure, intensities)
 
 %----Variables to keep track of data----
 

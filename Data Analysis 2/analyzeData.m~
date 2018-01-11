@@ -84,10 +84,6 @@ for i = 1:numberOfSubjects
     
     % Target Discrimination 
     targetDiscriminationData = getTargetDiscriminationData(dataStructure, intensities);
-    % ^ Same form as above
-    
-    % SDT
-    
     
     %---------------STORE DATA--------------
     

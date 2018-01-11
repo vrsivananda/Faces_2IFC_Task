@@ -1,6 +1,4 @@
-function betTPIntervalData = getBetTPIntervalData(dataStructure)
-
-intensities = [5,10,15,20,25,75,100];
+function betTPIntervalData = getBetTPIntervalData(dataStructure, intensities)
 
 %----Variables to keep track of data----
 

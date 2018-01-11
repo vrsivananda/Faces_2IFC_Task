@@ -11,7 +11,7 @@ lineWidth = 0.5;
 lineStyle = '--';
 
 % Get the number of subjects
-numberOfSubjects = size(betTPIntervalDataAll,1);
+numberOfSubjects = size(betTPIntervalDataAll,3);
 
 % Preallocate legend cell array
 legendCellArray = cell(numberOfSubjects,1);
@@ -24,7 +24,7 @@ for i = 1:numberOfSubjects
     targetDiscriminationData = targetDiscriminationDataAll(1,:,i);
     
     % Plot the data
-    plot(betTPIntervalData,targetDiscriminationData,'Marker',markerType,...
+    plot(targetDiscriminationData,betTPIntervalData,'Marker',markerType,...
     'MarkerSize',markerSize);
     
     % Prepare the legend
