@@ -1,10 +1,13 @@
-clear all;
+clear;
 close all;
 
 %----Analysis variables----
 
+% The suffix of the file
+fileSuffix = 'Round3';
+
 % The levels of intensities for the analysis
-intensities = [5, 25, 75, 100];
+intensities = [5, 15, 25, 75];
 
 % Threshold for valid trials
 validTrialsThreshold = 0.8; % Subjects with proportion below this is discarded
@@ -16,7 +19,7 @@ validTrialsThreshold = 0.8; % Subjects with proportion below this is discarded
 addpath([pwd '/Data']);
 
 % Create a path to the text file with all the subjects
-path='Faces_2IFC_Task_Subjects_Round2.txt';
+path = ['Faces_2IFC_Task_Subjects_' fileSuffix '.txt'];
 % Make an ID for the subject list file
 subjectListFileId=fopen(path);
 % Read in the number from the subject list
@@ -38,11 +41,13 @@ validSubjectIds = {};
 
 %----Variables to keep track of Data----
 
-% This is a 3D matrix that stores all subject's data on betTPInterval
-% and targetDiscrimination
+% This is a 3D matrix that stores all subject's data on betTPInterval,
+% targetDiscrimination, and Type1SDT
 % Each 2D sheet is a subject, depth is multiple subjects
 betTPIntervalDataAll = [];
 targetDiscriminationDataAll = [];
+type1SDTDataAll = [];
+neutralFacesDataAll = []; % This is (4 x 1 x nSubjects) dimentional (only 1 column)
 
 
 %----Start looping and get the values----
@@ -87,7 +92,19 @@ for i = 1:numberOfSubjects
     % ^ Same form as above
     
     % SDT
+    type1SDTData = calculateType1SDT(dataStructure, intensities);
+    % ^ In the form:
+    % 1st row: d'
+    % 2nd row: c
+    % 3rd row: nValidDiscriminationTrials
     
+    % Neutral faces
+    neutralFacesData = analyzeNeutralFaces(dataStructure);
+    % ^ In the form:
+    % 1st row: proportion Happy response
+    % 2nd row: proportion Fearful response
+    % 3rd row: nValidNeutralTrials
+    % 4th row: nInvalidNeutralTrials
     
     %---------------STORE DATA--------------
     
@@ -112,6 +129,8 @@ for i = 1:numberOfSubjects
         % Add another sheet (3rd dimension) for each subject
         betTPIntervalDataAll(:,:,nValidSubjects) = betTPIntervalData;
         targetDiscriminationDataAll(:,:,nValidSubjects) = targetDiscriminationData;
+        type1SDTDataAll(:,:,nValidSubjects) = type1SDTData;
+        neutralFacesDataAll(:,:,nValidSubjects) = neutralFacesData;
     
     end
     
@@ -121,3 +140,12 @@ end % End of loop for each subject
 
 % Plot the data for all the subjects
 plotMainAnalysisData(betTPIntervalDataAll,targetDiscriminationDataAll);
+
+% Plot the data for all the subjects using d' as x-axis
+plotMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll);
+
+% Plot the Type1 SDT data
+plotType1SDTData(type1SDTDataAll, intensities);
+
+% Plot the neutral Faces Data
+plotNeutralFacesData(neutralFacesData);

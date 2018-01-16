@@ -6,7 +6,6 @@ close all;
 % Get this file from the Oracle website if you don't have it otherwise.
 javaaddpath('mysql-connector-java-5.1.42-bin.jar');
 
-
 % Create a connection object by connecting to our SQL database.
 databaseUsername = '';
 databasePassword = '';
@@ -18,13 +17,13 @@ conn = database(databaseName,databaseUsername,databasePassword,'Vendor','MySQL',
 
 
 % Load a text file that lists all of the subjects.
-path='Faces_2IFC_Task_Subjects_Round2.txt';
+path='Faces_2IFC_Task_Subjects_Round3.txt';
 % Make an ID for the subject list file
 subjectListFileId=fopen(path);
 % Read in the number from the subject list
 numberOfSubjects = fscanf(subjectListFileId,'%d');
 disp('Number of subjects: ');
-disp(numberOfSubjects);
+disp(numberOfSubjects); 
 
 % Loop through all the subjects to get all the data from the database
 for i = 1:numberOfSubjects

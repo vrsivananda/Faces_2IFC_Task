@@ -55,7 +55,7 @@
         var nHardPracticeTrials = 4; //Must be a multiple of 4 to be counterbalanced properly
         var nRealTrials = 100; //Must be a multiple of 4 to be counterbalanced properly
         var nBreaks = 2;
-        var validIntensitiesArray = [5,25,75,100];//The intensities of emotions for the experiment
+        var validIntensitiesArray = [5, 15, 25, 75];//The intensities of emotions for the experiment
 
         //Timing variables
         var minPostTrialGap = 500; //Minimum gap after a trial in ms
@@ -730,7 +730,7 @@
         function makeConfidencePrompt(targetOrder, emotion, trialNumber, tag, trialType){
           
             var prompt = `<div style="max-width:${maxWidth}px; text-align:center;">` +
-            "<p>Which answer do you feel more confident in?</p>" + 
+            "<p>Which emotional face judgment would you like to bet on?</p>" + 
             "<p><br/>If <strong>first</strong>, press <strong>1</strong>.</p>" + 
             "<p>If <strong>second</strong>, press <strong>2</strong></p>" + 
             "</div>";
