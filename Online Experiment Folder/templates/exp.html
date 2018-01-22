@@ -662,8 +662,8 @@
             }
             else if(difficultyLevel === "N/A"){
               //Pick out the paths to the respective faces with a random intensity out of valid intensities
-              var face1 = chooseFace(emotionIndex1, person1);
-              var face2 = chooseFace(emotionIndex2, person2)
+              var face1 = chooseFace(emotionIndex1, person1, tag);
+              var face2 = chooseFace(emotionIndex2, person2, tag);
             }
             
             
@@ -929,28 +929,32 @@
         //---------Convenience Functions--------
         
         //Function to choose the face
-        function chooseFace(emotionIndex, person){
+        function chooseFace(emotionIndex, person, tag){
           
-          //Flag to see if the emotion is valid
-          var intensityIsInvalid = true;
+          //If it is a neutral face, get a random neutral face and then return it
+          if(emotionIndex === "N"){
+            return jsPsych.randomization.sample(faceMap[emotionIndex][person],1)[0];
+          }
           
-          while(intensityIsInvalid){
+          //Else it is an emotion face and we find the appropriate face
+          else{
             
-            //Choose a face
-            var currentFace = jsPsych.randomization.sample(faceMap[emotionIndex][person],1)[0]
+            //Calculate the intensity index of the valid intensities array from the tag
+            var intensityIndex = tag % 4;
             
-            //Get the intensity of the face
-            var currentIntensity = currentFace.match(/([HFN])([0-9]+)_([0-9]+)/)[3];
+            //Get the intensity
+            var intensity = validIntensitiesArray[intensityIndex];
             
-            //If the intensity of the face is within the valid intensities, then set the flag to false and break out of the while loop
-            if(validIntensitiesArray.includes(parseInt(currentIntensity)) || currentIntensity === '0'){
-              intensityIsInvalid = false;
-            }
-
-          }//End of while loop
+            //Turn it into a string
+            var intensityString = intensity.toString();
+            
+            //Find the index of that intensity in the faceMap
+            var faceMapIntensityIndex = faceMap[emotionIndex][person].indexOf(intensityString);
+            
+            //Return that face
+            return faceMap[emotionIndex][person][faceMapIntensityIndex];
           
-          //Return the face
-          return currentFace;
+          }//End of if emotionIndex == "N"
           
         }//End of chooseFace
         
