@@ -57,7 +57,7 @@ ylim([minY-yLimBuffer maxY+yLimBuffer]);
 
 % Set the axis labels
 xlabel('intensities');
-ylabel('d');
+ylabel('d''');
 
 % Set the x-ticks
 xticks(intensities);

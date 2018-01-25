@@ -4,7 +4,7 @@
 close all;
 
 % Create a path to the text file with all the subjects
-path='Faces_2IFC_Task_Subjects_Round3.txt';
+path='Faces_2IFC_Task_Subjects_Round5.txt';
 % Make an ID for the subject list file
 subjectListFileId=fopen(path);
 % Read in the number from the subject list
@@ -48,7 +48,7 @@ for i = 1:numberOfSubjects
     counter = 0;
     
     % Only do subjects that have complete data
-    if (length(returnIndices(dataStructure.trialType,'real')) < 500)
+    if (length(returnIndices(dataStructure.trialType,'real')) < 560)
         
         %Save the data and move to the next subject
         nIncompleteData = nIncompleteData + 1;
@@ -143,23 +143,22 @@ for i = 1:numberOfSubjects
                         end % End of if keyPress
                     end % End of if targetOrder
 
-                    % Save all the variables (+1 because currentTrialNumber
-                    % starts at 0)
+                    % Save all the variables
 
-                    subject{currentTrialNumber+1,1} = subjectId;
-                    trialNumber{currentTrialNumber+1,1} = currentTrialNumber;
-                    rtInterval{currentTrialNumber+1,1} = currentRtInterval;
-                    rtEmotion{currentTrialNumber+1,1} = currentRtEmotion;
-                    rtNeutral{currentTrialNumber+1,1} = currentRtNeutral;
-                    discardInterval{currentTrialNumber+1,1} = {};
-                    discardEmotion{currentTrialNumber+1,1} = {};
-                    discardNeutral{currentTrialNumber+1,1} = {};
-                    trialEmotion{currentTrialNumber+1,1} = currentTrialEmotion;
-                    targetOrder{currentTrialNumber+1,1} = currentTargetOrder;
-                    intensity{currentTrialNumber+1,1} = currentIntensity;
-                    intervalJudgment{currentTrialNumber+1,1} = currentIntervalJudgment;
-                    emotionJudgment{currentTrialNumber+1,1} = currentEmotionJudgment;
-                    neutralJudgment{currentTrialNumber+1,1} = currentNeutralJudgment;
+                    subject{currentTrialNumber,1} = subjectId;
+                    trialNumber{currentTrialNumber,1} = currentTrialNumber;
+                    rtInterval{currentTrialNumber,1} = currentRtInterval;
+                    rtEmotion{currentTrialNumber,1} = currentRtEmotion;
+                    rtNeutral{currentTrialNumber,1} = currentRtNeutral;
+                    discardInterval{currentTrialNumber,1} = {};
+                    discardEmotion{currentTrialNumber,1} = {};
+                    discardNeutral{currentTrialNumber,1} = {};
+                    trialEmotion{currentTrialNumber,1} = currentTrialEmotion;
+                    targetOrder{currentTrialNumber,1} = currentTargetOrder;
+                    intensity{currentTrialNumber,1} = currentIntensity;
+                    intervalJudgment{currentTrialNumber,1} = currentIntervalJudgment;
+                    emotionJudgment{currentTrialNumber,1} = currentEmotionJudgment;
+                    neutralJudgment{currentTrialNumber,1} = currentNeutralJudgment;
 
                     % Reset the counter
                     counter = 0;

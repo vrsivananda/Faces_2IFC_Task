@@ -1,5 +1,8 @@
 function plotMainAnalysisData(betTPIntervalDataAll,targetDiscriminationDataAll)
 
+% New figure
+figure;
+
 % Parameters
 markerSize = 20;
 %markerColor = 'b';

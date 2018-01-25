@@ -1,5 +1,8 @@
 function plotMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll)
 
+% New figure
+figure;
+
 % Parameters
 markerSize = 20;
 %markerColor = 'b';
@@ -12,10 +15,11 @@ lineWidth = 0.5;
 lineStyle = '--';
 
 % Get the number of subjects
-numberOfSubjects = size(betTPIntervalDataAll,3);
+numberOfSubjects = size(type1SDTDataAll,3);
 
 % Preallocate legend cell array
 legendCellArray = cell(numberOfSubjects,1);
+
 
 % Loop through each subject and plot the data
 for i = 1:numberOfSubjects
@@ -43,8 +47,6 @@ hold off;
 xlim([minX maxX]);
 ylim([0 1]);
 
-% Set the legend
-legend(legendCellArray,'Location','southeast');
 
 % ---Draw the lines on the graph---
 

@@ -6,8 +6,8 @@ minX = 0;
 maxX = 3;
 
 % Load in variables for easy handling
-pHappy = neutralFacesDataAll(1,1,:).*100;
-pFearful = neutralFacesDataAll(2,1,:).*100;
+pHappy = neutralFacesDataAll(1,1,:);
+pFearful = neutralFacesDataAll(2,1,:);
 n = length(pHappy);
 
 % Calculate the means
@@ -34,11 +34,11 @@ errorbar([1,2],y,[pHappySEM, pFearfulSEM],'.'); % This works when we run only th
 % Format the graph
 set(gca, 'XTickLabel', {'Happy' 'Fearful'});
 xlim([minX maxX]);
-ylim([0 100]);
+ylim([0 1]);
 
 % line for when y = 0.5
 hold on;
-plot([minX maxX], [50, 50],'LineStyle','--','LineWidth',0.5,'Color',[0.5, 0.5, 0.5]);
+plot([minX maxX], [0.5, 0.5],'LineStyle','--','LineWidth',0.5,'Color',[0.5, 0.5, 0.5]);
 
 
 end

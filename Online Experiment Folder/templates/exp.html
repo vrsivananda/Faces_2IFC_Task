@@ -53,10 +53,14 @@
         //Trial parameters
         var nEasyPracticeTrials = 4; //Must be a multiple of 4 to be counterbalanced properly
         var nHardPracticeTrials = 4; //Must be a multiple of 4 to be counterbalanced properly
-        var nRealTrials = 100; //Must be a multiple of 4 to be counterbalanced properly
+        var nRealTrials = 96; //Must be a multiple of 4 to be counterbalanced properly
+        var nReal75Trials = 16;
         var nBreaks = 2;
-        var validIntensitiesArray = [5, 15, 25, 75];//The intensities of emotions for the experiment
-
+        var validIntensitiesArray = [5, 15, 25];//The intensities of emotions for the experiment
+        var validPersonsArray = [10,13,14,18,26,40,41,43]; //The people whose faces will be used in the experiment
+        var allIntensitiesArray = [10,100,15,20,25,5,75]; // The order of how the intensities in the face map are ordered
+        
+        
         //Timing variables
         var minPostTrialGap = 500; //Minimum gap after a trial in ms
         var maxPostTrialGap = 1500; //Maximum gap after a trial in ms
@@ -87,7 +91,7 @@
         
         //Fill in the faceMap
         createFaceMap();
-        //console.log(faceMap);
+        console.log(faceMap);
 
         //Variable to keep track of number of points
         var pointsCounter = 0;
@@ -115,6 +119,14 @@
         
         //Make the array of real trials
         var realTrialsBlock = makeTrials("real");
+        
+        //Make the array of real trials
+        var real75TrialsBlock = makeTrials("real","75");
+        
+        //Concatenate all the real trials and shuffle them
+        realTrialsBlock.timeline = concatenateShuffleRetag(realTrialsBlock, real75TrialsBlock);
+
+        console.log(realTrialsBlock);
         
         //Insert the break screen
         var realTrialsBlockWithBreaks = insertBreakScreens(realTrialsBlock);
@@ -150,7 +162,7 @@
               jsPsych.data.displayData(); //Display the data onto the browser screen
             }
             if(psiTurkIsOn == true){
-              psiturk.saveData({ 
+              Data({ 
                 success: function(){
                   psiturk.completeHIT(); //Complete the HIT
                 }
@@ -397,12 +409,44 @@
             };
         }//End of makeExampleBlock()
         
+        function concatenateShuffleRetag(block1, block2){
+          
+          //Load in timelines for easy handline 
+          var timeline1 = block1.timeline;
+          var timeline2 = block2.timeline;
+          
+          //Concatenate the timelines
+          var allTimelines = timeline1.concat(timeline2);
+          
+          //Shuffle the timeline
+          allTimelines = jsPsych.randomization.repeat(allTimelines,1);
+          
+          //For loop that goes through all the trials and re-tags them properly
+          for (var i = 0; i < allTimelines.length; i++){
+            
+            //Change the trial numbers of all the non-fixation cross trials
+            allTimelines[i].timeline[1].data.trialNumber = i+1; // First face
+            allTimelines[i].timeline[3].data.trialNumber = i+1; // Second face
+            allTimelines[i].timeline[4].data.trialNumber = i+1; // Interval question
+            allTimelines[i].timeline[5].data.trialNumber = i+1; // Emotion question 1
+            allTimelines[i].timeline[6].data.trialNumber = i+1; // Emotion question 2
+            
+          }//End of for loop
+          
+          //Return the new timeline
+          return allTimelines;
+          
+        }//End of concatenateShuffleRetag
+        
         //Make a random permutation based on the number of trials
         function makeTagArray(trialType, difficultyLevel){
             
             //Set the correct number of trials
-            if(trialType === "real"){
+            if(trialType === "real" && difficultyLevel === "N/A"){
               var n = nRealTrials;
+            }
+            else if(trialType == "real" && difficultyLevel === "75"){
+              var n = nReal75Trials;
             }
             else if(trialType === "practice" && difficultyLevel === "easy"){
               var n = nEasyPracticeTrials;
@@ -456,10 +500,10 @@
                 var tag = tagArray[i];
                 
                 //Variable to store the target presentation
-                var targetOrder = determineTargetOrder(tag, tagArray.length, trialType);
+                var targetOrder = determineTargetOrder(tag, tagArray.length, trialType, difficultyLevel);
                 
                 //Variable to store the emotion of the target face (real trials), or the emotion of the first face (practice trials) 
-                var emotion = determineTargetEmotion(tag, tagArray.length);
+                var emotion = determineTargetEmotion(tag, tagArray.length, difficultyLevel);
                 
                 //Make the presentation pair
                 var presentationPair = makePresentationPair(targetOrder, emotion, i, tag, trialType, difficultyLevel);
@@ -627,14 +671,41 @@
               }
             }
             
-            
-            
-            //Get the array of possible people
-            var possiblePeople1 = Object.keys(faceMap[emotionIndex1]);
-            var possiblePeople2 = Object.keys(faceMap[emotionIndex2]);
-            
-            //Randomly choose from one of the possible emotion people
-            var person1 = jsPsych.randomization.sample(possiblePeople1,1)[0];
+            //If the trial is real and the first person is emotive, then choose the first person first
+            if(trialType === "real" && (emotion1 === "happy" || emotion1 === "fearful") ){
+              
+              //If 75% intensity trial, then we use a simpler calculation to determine person
+              if(difficultyLevel === "75"){
+                var person1Index = tag%8;
+              }
+              else{
+                //Calculate the index of person1
+                var person1Index = Math.floor((tag%(validIntensitiesArray.length*validPersonsArray.length))/validIntensitiesArray.length);
+              }
+              
+              //Choose person 1
+              var person1 = validPersonsArray[person1Index];
+            }
+            //Else if the trial is real and the second person is emotive, then choose the second person first
+            else if(trialType === "real" && (emotion2 === "happy" || emotion2 === "fearful") ){
+              
+              //If 75% intensity trial, then we use a simpler calculation to determine person
+              if(difficultyLevel === "75"){
+                var person2Index = tag%8;
+              }
+              else{
+              
+                //Calculate the index of person2
+                var person2Index = Math.floor((tag%(validIntensitiesArray.length*validPersonsArray.length))/validIntensitiesArray.length);
+              }
+                
+                //Choose person 2
+                var person2 = validPersonsArray[person2Index];
+            }
+            //Else this is a practice trial, so we randomly choose a person for person 1
+            else{
+              var person1 = jsPsych.randomization.sample(validPersonsArray,1)[0];
+            }
             
             //Flag to make sure that we don't choose the same person
             var samePerson = true;
@@ -642,8 +713,14 @@
             //While loop to choose the second person, making sure that it is not the same as the first person
             while(samePerson){
               
-                //Randomly pick the second person from list of the possible people people
-                var person2 = jsPsych.randomization.sample(possiblePeople2,1)[0];
+                //If trial is real and person 2 is emotive, then we pick person 1
+                if(trialType === "real" && (emotion2 === "happy" || emotion2 === "fearful") ){
+                  var person1 = jsPsych.randomization.sample(validPersonsArray,1)[0];
+                }
+                //Else person 2 is either a neutral person or this is a practice trial, so we now pick person 2
+                else{
+                  var person2 = jsPsych.randomization.sample(validPersonsArray,1)[0];
+                }
                 
                 //Check to make sure that it is not the same person
                 if(person2 != person1){
@@ -660,12 +737,16 @@
               var face1 = faceMap[emotionIndex1][person1]["4"]; //"4" corresponds to intensity 25 in the faceMap
               var face2 = faceMap[emotionIndex2][person2]["4"]; //"4" corresponds to intensity 25 in the faceMap
             }
+            else if(difficultyLevel === "75"){
+              //Pick out the paths to the respective faces with 75 intensity
+              var face1 = chooseFace(emotionIndex1, person1, tag, difficultyLevel);
+              var face2 = chooseFace(emotionIndex2, person2, tag, difficultyLevel);
+            }
             else if(difficultyLevel === "N/A"){
               //Pick out the paths to the respective faces with a random intensity out of valid intensities
-              var face1 = chooseFace(emotionIndex1, person1, tag);
-              var face2 = chooseFace(emotionIndex2, person2, tag);
+              var face1 = chooseFace(emotionIndex1, person1, tag, difficultyLevel);
+              var face2 = chooseFace(emotionIndex2, person2, tag, difficultyLevel);
             }
-            
             
             //Record the intensity of each face
             var intensity1 = face1.match(/([HFN])([0-9]+)_([0-9]+)/)[3];
@@ -912,7 +993,7 @@
           for (var i = 1; i <= nBreaks; i++){
             
             //Splice it into the trialsArray
-            trialsArray.splice(Math.round((i/(nBreaks+1))*nRealTrials),0,breakScreenObject);
+            trialsArray.splice(Math.round((i/(nBreaks+1))*(nRealTrials+nReal75Trials)),0,breakScreenObject);
             
           }
           
@@ -929,27 +1010,30 @@
         //---------Convenience Functions--------
         
         //Function to choose the face
-        function chooseFace(emotionIndex, person, tag){
+        function chooseFace(emotionIndex, person, tag, difficultyLevel){
           
           //If it is a neutral face, get a random neutral face and then return it
           if(emotionIndex === "N"){
-            return jsPsych.randomization.sample(faceMap[emotionIndex][person],1)[0];
+            //Doesn't really matter but just making sure
+            var zeroOrOne = Math.random() < 0.5 ? 0 : 1;
+            //Return the neutral face of that person
+            return faceMap["N"][person][zeroOrOne];
           }
-          
+          else if(difficultyLevel === "75"){
+            //Return the 75% face of that person
+            return faceMap[emotionIndex][person][6]; //6 is the index for 75%
+          }
           //Else it is an emotion face and we find the appropriate face
-          else{
+          else if(difficultyLevel === "N/A"){
             
             //Calculate the intensity index of the valid intensities array from the tag
-            var intensityIndex = tag % 4;
+            var intensityIndex = tag % 3;
             
             //Get the intensity
             var intensity = validIntensitiesArray[intensityIndex];
             
-            //Turn it into a string
-            var intensityString = intensity.toString();
-            
             //Find the index of that intensity in the faceMap
-            var faceMapIntensityIndex = faceMap[emotionIndex][person].indexOf(intensityString);
+            var faceMapIntensityIndex = allIntensitiesArray.indexOf(intensity);
             
             //Return that face
             return faceMap[emotionIndex][person][faceMapIntensityIndex];
@@ -959,7 +1043,12 @@
         }//End of chooseFace
         
         //Function to determine the order of targetPresentation
-        function determineTargetOrder(tag, n, trialType){
+        function determineTargetOrder(tag, n, trialType, difficultyLevel){
+            
+            //If it is the 75% intensity, w randomize the interval
+            if(difficultyLevel === "75"){
+              return Math.random() < 0.5 ? "first" : "second";
+            }
             
             //If it is in the first half, then the target is presented in the FIRST presentation (real trials), or they are the SAME emotion (practice trials)
             if(tag < n/2){
@@ -983,7 +1072,17 @@
         }
         
         //Function to determine the emotion of the target face
-        function determineTargetEmotion(tag, n){
+        function determineTargetEmotion(tag, n, difficultyLevel){
+          
+            //If it is the 75% intensity, then the first half is happy and the second half is fearful
+            if(difficultyLevel === "75"){
+              if(tag < n/2){
+                return "happy";
+              }
+              else if (tag >= n/2){
+                return "fearful";
+              }
+            }
             
             //If the tag is in the first or third quartile, then it is a happy face
             if( tag < n/4 || (tag >= n/2 && tag < 3*n/4) ){
@@ -1030,7 +1129,13 @@
         function save_data(data_table,data){
           
           //Add data to the jsPsych data file
-          jsPsych.data.addProperties({stimulus: '', subject: psiturk.taskdata.get('workerId')});
+          jsPsych.data.addProperties(
+            {
+              subject: psiturk.taskdata.get('workerId'),
+              assignmentId: psiturk.taskdata.get('assignmentId'),
+              hitId: psiturk.taskdata.get('hitId')
+            }
+          );
           
           //Use AJAX to post the data onto the psiturk server
           $.ajax({
