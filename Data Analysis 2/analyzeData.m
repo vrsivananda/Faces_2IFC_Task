@@ -4,7 +4,7 @@ close all;
 %----Analysis variables----
 
 % The suffix of the file
-fileSuffix = 'Round4&5';
+fileSuffix = 'Round4&5&6';
 
 % The levels of intensities for the analysis
 intensities = [5, 15, 25, 75];
@@ -146,6 +146,9 @@ plotSmoothenedMainAnalysisData(betTPIntervalDataAll,targetDiscriminationDataAll)
 
 % Plot the data for all the subjects using d' as x-axis
 plotMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll);
+
+% Plot the data for all the subjects using d' as x-axis
+plotSmoothenedMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll);
 
 % Plot the Type1 SDT data
 plotType1SDTData(type1SDTDataAll, intensities);

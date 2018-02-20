@@ -46,7 +46,7 @@ xlim([0 1]);
 ylim([0 1]);
 
 % Set the legend
-legend(legendCellArray,'Location','northwest');
+%legend(legendCellArray,'Location','northwest');
 
 % ---Draw the lines on the graph---
 

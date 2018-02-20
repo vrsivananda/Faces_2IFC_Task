@@ -63,7 +63,7 @@ ylabel('d''');
 xticks(intensities);
 
 % Set the legend
-legend(legendCellArray,'Location','northwest');
+%legend(legendCellArray,'Location','northwest');
 
 
 %---- c ----
@@ -110,7 +110,7 @@ ylabel('c');
 xticks(intensities);
 
 % Set the legend
-legend(legendCellArray,'Location','northeast');
+%legend(legendCellArray,'Location','northeast');
 
 
 end % End of function

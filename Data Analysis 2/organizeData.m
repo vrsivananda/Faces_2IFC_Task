@@ -4,7 +4,7 @@
 close all;
 
 % Create a path to the text file with all the subjects
-path='Faces_2IFC_Task_Subjects_Round5.txt';
+path='Faces_2IFC_Task_Subjects_Round6.txt';
 % Make an ID for the subject list file
 subjectListFileId=fopen(path);
 % Read in the number from the subject list
