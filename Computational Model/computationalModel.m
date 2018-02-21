@@ -11,7 +11,7 @@ prior = 0.5; % Prior where chance of getting happy vs fearful is 0.5 for both
 
 % --- Prepare matrices to store data ---
 
-% Inner loop
+% Inner loop stores
 pHsH_posterior_store = nan(nTrials,length(intensities));
 pFsH_posterior_store = nan(nTrials,length(intensities));
 pFsF_posterior_store = nan(nTrials,length(intensities));
@@ -19,7 +19,7 @@ pHsF_posterior_store = nan(nTrials,length(intensities));
 pHsN_posterior_store = nan(2*nTrials,length(intensities));
 pFsN_posterior_store = nan(2*nTrials,length(intensities));
 
-% Outer loop
+% Outer loop stores
 percentDiscCorrect_All   = nan(length(intensities),1);
 percentBetTPInterval_All = nan(length(intensities),1);
 
@@ -142,13 +142,15 @@ end % End of for j = 1:length(intensities)
 lineWidth = 0.5;
 lineStyle = '--';
 
-% Draw the graph
+% --- Draw the graph ---
 figure;
 plot(percentDiscCorrect_All, percentBetTPInterval_All);
 xlim([0 1]);
 ylim([0 1]);
+xlabel('Target discrimination % correct');
+ylabel('% bet on target-present interval');
 
-% ---Draw the lines on the graph---
+% --- Draw the lines on the graph ---
 
 % line for when y = 0.5
 hold on;
