@@ -23,7 +23,12 @@ pFsN_posterior_store = nan(2*nTrials,length(intensities));
 percentDiscCorrect_All   = nan(length(intensities),1);
 percentBetTPInterval_All = nan(length(intensities),1);
 
+% Store for the responses based on stimuli
+responsesBasedOnStimuli = nan(4, 4, length(intensities));
+% ^ This is a (4 x 4 x length(intensities)) dimensional matrix
 
+
+% For loop that loops through the intensities
 for j = 1:length(intensities)
 
     % ----- Target Discrimination -----
@@ -31,10 +36,10 @@ for j = 1:length(intensities)
     % Target Present Interval
 
     % Get the samples from each distribution
-    sampleSH = mvnrnd([0, intensities(j)],sigma,nTrials);
-    sampleSF = mvnrnd([intensities(j), 0],sigma,nTrials);
+    sampleSH = mvnrnd([0, intensities(j)],sigma,nTrials); % [x,y] for each point from the Happy distribution at this intensity
+    sampleSF = mvnrnd([intensities(j), 0],sigma,nTrials); % [x,y] for each point from the Fearful distribution at this intensity
 
-    % Get the likelihoods of each sample being from each distribution
+    % Get the likelihoods of each sample being from each distribution/intensity
     for i = 1:length(intensities)
 
         % Likelihoods from Happy sample
@@ -54,7 +59,7 @@ for j = 1:length(intensities)
         pFsF_posterior = (lFsF*prior)./((lFsF*prior)+(lHsF*prior));
         pHsF_posterior = (lHsF*prior)./((lFsF*prior)+(lHsF*prior));
 
-        % Log the posteriors for all the intensities (add each of them in as a column in
+        % Log the posteriors for all the intensities (add each of them in as a column of nTrials in
         % our store)
         pHsH_posterior_store(:,i) = pHsH_posterior;
         pFsH_posterior_store(:,i) = pFsH_posterior;
@@ -70,9 +75,51 @@ for j = 1:length(intensities)
     pFsF_posterior_average = sum(pFsF_posterior_store,2)/length(intensities);
     pHsF_posterior_average = sum(pHsF_posterior_store,2)/length(intensities);
 
-    %Indices of those which are correct
+    % Indices of those which are correct
+	% (Because the subject will decide based on which posterior is higher,
+	% and those decisions are correct if the sample also came from a 
+	% corresponding distribution)
     indexCorrectH = pHsH_posterior_average > pFsH_posterior_average;
     indexCorrectF = pFsF_posterior_average > pHsF_posterior_average;
+	
+	% vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+	% To classify the responses based on stimuli
+	
+	% Split the posteriors into TP1 and TP2 (target persent interval)
+	% First half goes to TP1
+	pHsH_posterior_average_TP1 = pHsH_posterior_average(1:(nTrials/2),:);
+    pFsH_posterior_average_TP1 = pFsH_posterior_average(1:(nTrials/2),:);
+    pFsF_posterior_average_TP1 = pFsF_posterior_average(1:(nTrials/2),:);
+    pHsF_posterior_average_TP1 = pHsF_posterior_average(1:(nTrials/2),:);
+	
+	% Second half goes to TP2
+	pHsH_posterior_average_TP2 = pHsH_posterior_average(((nTrials/2)+1):nTrials,:);
+    pFsH_posterior_average_TP2 = pFsH_posterior_average(((nTrials/2)+1):nTrials,:);
+    pFsF_posterior_average_TP2 = pFsF_posterior_average(((nTrials/2)+1):nTrials,:);
+    pHsF_posterior_average_TP2 = pHsF_posterior_average(((nTrials/2)+1):nTrials,:);
+	
+	% Get the posteriors of trials where subjects respond:
+	% - TP1 - 
+	% (1) Happy when stimuli is Happy
+	respH_stimH_TP1 = pHsH_posterior_average_TP1(pHsH_posterior_average_TP1 > pFsH_posterior_average_TP1);
+	% (2) Fearful when stimuli is Happy
+	respF_stimH_TP1 = pFsH_posterior_average_TP1(pFsH_posterior_average_TP1 > pHsH_posterior_average_TP1);
+	% (3) Fearful when stimuli is Fearful
+	respF_stimF_TP1 = pFsF_posterior_average_TP1(pFsF_posterior_average_TP1 > pHsF_posterior_average_TP1);
+	% (4) Happy when stimuli is Fearful
+	respH_stimF_TP1 = pHsF_posterior_average_TP1(pHsF_posterior_average_TP1 > pFsF_posterior_average_TP1);
+	
+	% - TP2 - 
+	% (1) Happy when stimuli is Happy
+	respH_stimH_TP2 = pHsH_posterior_average_TP2(pHsH_posterior_average_TP2 > pFsH_posterior_average_TP2);
+	% (2) Fearful when stimuli is Happy
+	respF_stimH_TP2 = pFsH_posterior_average_TP2(pFsH_posterior_average_TP2 > pHsH_posterior_average_TP2);
+	% (3) Fearful when stimuli is Fearful
+	respF_stimF_TP2 = pFsF_posterior_average_TP2(pFsF_posterior_average_TP2 > pHsF_posterior_average_TP2);
+	% (4) Happy when stimuli is Fearful
+	respH_stimF_TP2 = pHsF_posterior_average_TP2(pHsF_posterior_average_TP2 > pFsF_posterior_average_TP2);
+	
+	% ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     % Number correct from each sample
     nCorrectH = sum(indexCorrectH);
@@ -95,7 +142,10 @@ for j = 1:length(intensities)
 
     % Draw the sample from the noise distribution
     sampleN = mvnrnd(muNoise,sigma,2*nTrials);
-
+	
+	% For loop that loops through the intensities to test whether the
+	% neutral stimuli would be classified as being from the Happy or
+	% Fearful distributions
     for i = 1:length(intensities)
 
         % Calculate the likelihoods from each
@@ -134,6 +184,175 @@ for j = 1:length(intensities)
 
     % Insert that percentage into the store to keep track
     percentBetTPInterval_All(j) = percentBetTPInterval;
+	
+	% vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+	% To classify the responses based on stimuli
+	
+	% Split the posteriors into TP1 and TP2 (target persent interval)
+	% First half goes to TP1
+	pHsN_posterior_average_TP1 = pHsN_posterior_average(1:nTrials,:);
+	pFsN_posterior_average_TP1 = pFsN_posterior_average(1:nTrials,:);
+	
+	% Second half goes to TP2
+	pHsN_posterior_average_TP2 = pHsN_posterior_average((nTrials+1):(2*nTrials),:);
+	pFsN_posterior_average_TP2 = pFsN_posterior_average((nTrials+1):(2*nTrials),:);
+	
+	% Get the posteriors of trials where subjects respond:
+	% - TP1 - 
+	% (1) Happy when stimuli is Neutral
+	respH_stimN_TP1 = pHsN_posterior_average_TP1(pHsN_posterior_average_TP1 > pFsN_posterior_average_TP1);
+	% (2) Fearful when stimuli is Neutral
+	respF_stimN_TP1 = pFsN_posterior_average_TP1(pFsN_posterior_average_TP1 > pHsN_posterior_average_TP1);
+	
+	% - TP2 - 
+	% (1) Happy when stimuli is Neutral
+	respH_stimN_TP2 = pHsN_posterior_average_TP2(pHsN_posterior_average_TP2 > pFsN_posterior_average_TP2);
+	% (2) Fearful when stimuli is Neutral
+	respF_stimN_TP2 = pFsN_posterior_average_TP2(pFsN_posterior_average_TP2 > pHsN_posterior_average_TP2);
+	
+	% ------------- Fit them into boxes -------------
+	
+	% Boxes are in the form:
+	%     | F,N | H,N | N,F | N,H | <-- Columns: Stimuli
+	% ----|-----|-----|-----|-----|
+	% F,x |     |     |     |     |
+	% ----|-----|-----|-----|-----|
+	% H,x |     |     |     |     |
+	% ----|-----|-----|-----|-----|
+	% x,F |     |     |     |     |
+	% ----|-----|-----|-----|-----|
+	% x,H |     |     |     |     |
+	% ----+-----+-----+-----+-----+
+	% 
+	% ^ Rows: Responses (Emotion that was bet on)
+	
+	% Comparisons are in the form:
+	% |-------|--------|--------|-------|
+	% |       |   TP   |   TA   |		|
+	% |-------|--------|--------|-------|
+	% |		  |		   | respH  |		|
+	% |		  | respH  |--------|		|
+	% |		  |		   | respF  |	    |
+	% | stimH |--------|--------|		|
+	% |		  |		   | respH  |		|
+	% |		  | respF  |--------|		|
+	% |		  |		   | respF  |		|
+	% |-------|--------|--------| stimN |
+	% |		  |		   | respH  |		|
+	% |		  | respH  |--------|		|
+	% |		  |		   | respF  |		|
+	% | stimF |--------|--------|		|
+	% |		  |		   | respH  |		|
+	% |		  | respF  |--------|		|
+	% |		  |		   | respF  |		|
+	% |-------|--------|--------|-------|
+	%
+	% ^ For each TP1 and TP2
+	
+	% ---------- TP1 ----------
+	
+	% Counter to pair up the stimH and stimF with the stimN responses
+	permCounter_TP1 = 0;
+	
+	% Create a random permutation for the stimN (TA) responses such that they
+	% can be compared to the stimF/stimN (TP) reponses
+	permutation_TP1 = randperm(nTrials);
+	
+	% --- Variables to keep track of betting ---
+	
+	% Bets when fearful face on interval 1 (TP = 1, Fear)
+	bet_int1_respF_stimF_TP1 = 0;
+	bet_int1_respH_stimF_TP1 = 0;
+	bet_int2_respF_stimF_TP1 = 0;
+	bet_int2_respH_stimF_TP1 = 0;
+	
+	% Bets when happy face on interval 1 (TP = 1, Happy)
+	bet_int1_respF_stimH_TP1 = 0;
+	bet_int1_respH_stimH_TP1 = 0;
+	bet_int2_respF_stimH_TP1 = 0;
+	bet_int2_respH_stimH_TP1 = 0;
+	
+	% When stimulus F and response F
+	[permCounter_TP1, bet_int1_respF_stimF_TP1, bet_int2_respF_stimF_TP1, bet_int2_respH_stimF_TP1] = ...
+		compareAndBet(respF_stimF_TP1, respF_stimN_TP1, respH_stimN_TP1, permCounter_TP1,...
+		permutation_TP1, bet_int1_respF_stimF_TP1, bet_int2_respF_stimF_TP1, bet_int2_respH_stimF_TP1);
+	
+	% When stimulus F and response H
+	[permCounter_TP1, bet_int1_respH_stimF_TP1, bet_int2_respF_stimF_TP1, bet_int2_respH_stimF_TP1] = ...
+		compareAndBet(respH_stimF_TP1, respF_stimN_TP1, respH_stimN_TP1, permCounter_TP1,...
+		permutation_TP1, bet_int1_respH_stimF_TP1, bet_int2_respF_stimF_TP1, bet_int2_respH_stimF_TP1);
+	
+	% When stimulus H and response F
+	[permCounter_TP1, bet_int1_respF_stimH_TP1, bet_int2_respF_stimH_TP1, bet_int2_respH_stimH_TP1] = ...
+		compareAndBet(respF_stimH_TP1, respF_stimN_TP1, respH_stimN_TP1, permCounter_TP1,...
+		permutation_TP1, bet_int1_respF_stimH_TP1, bet_int2_respF_stimH_TP1, bet_int2_respH_stimH_TP1);
+	
+	% When stimulus H and response H
+	[permCounter_TP1, bet_int1_respH_stimH_TP1, bet_int2_respF_stimH_TP1, bet_int2_respH_stimH_TP1] = ...
+		compareAndBet(respH_stimH_TP1, respF_stimN_TP1, respH_stimN_TP1, permCounter_TP1,...
+		permutation_TP1, bet_int1_respH_stimH_TP1, bet_int2_respF_stimH_TP1, bet_int2_respH_stimH_TP1);
+	
+	
+	
+	% ---------- TP2 ----------
+	
+	% Counter to pair up the stimH and stimF with the stimN responses
+	permCounter_TP2 = 0;
+	
+	% Create a random permutation for the stimN (TA) responses such that they
+	% can be compared to the stimF/stimN (TP) reponses
+	permutation_TP2 = randperm(nTrials);
+	
+	% --- Variables to keep track of betting ---
+	
+	% Bets when fearful face on interval 1 (TP = 2, Fear)
+	bet_int1_respF_stimF_TP2 = 0;
+	bet_int1_respH_stimF_TP2 = 0;
+	bet_int2_respF_stimF_TP2 = 0;
+	bet_int2_respH_stimF_TP2 = 0;
+	
+	% Bets when happy face on interval 1 (TP = 2, Happy)
+	bet_int1_respF_stimH_TP2 = 0;
+	bet_int1_respH_stimH_TP2 = 0;
+	bet_int2_respF_stimH_TP2 = 0;
+	bet_int2_respH_stimH_TP2 = 0;
+	
+	% When stimulus F and response F
+	[permCounter_TP2, bet_int2_respF_stimF_TP2, bet_int1_respF_stimF_TP2, bet_int1_respH_stimF_TP2] = ...
+		compareAndBet(respF_stimF_TP2, respF_stimN_TP2, respH_stimN_TP2, permCounter_TP2,...
+		permutation_TP2, bet_int2_respF_stimF_TP2, bet_int1_respF_stimF_TP2, bet_int1_respH_stimF_TP2);
+	
+	% When stimulus F and response H
+	[permCounter_TP2, bet_int2_respH_stimF_TP2, bet_int1_respF_stimF_TP2, bet_int1_respH_stimF_TP2] = ...
+		compareAndBet(respH_stimF_TP2, respF_stimN_TP2, respH_stimN_TP2, permCounter_TP2,...
+		permutation_TP2, bet_int2_respH_stimF_TP2, bet_int1_respF_stimF_TP2, bet_int1_respH_stimF_TP2);
+	
+	% When stimulus H and response F
+	[permCounter_TP2, bet_int2_respF_stimH_TP2, bet_int1_respF_stimH_TP2, bet_int1_respH_stimH_TP2] = ...
+		compareAndBet(respF_stimH_TP2, respF_stimN_TP2, respH_stimN_TP2, permCounter_TP2,...
+		permutation_TP2, bet_int2_respF_stimH_TP2, bet_int1_respF_stimH_TP2, bet_int1_respH_stimH_TP2);
+		
+	% When stimulus H and response H
+	[permCounter_TP2, bet_int2_respH_stimH_TP2, bet_int1_respF_stimH_TP2, bet_int1_respH_stimH_TP2] = ...
+		compareAndBet(respH_stimH_TP2, respF_stimN_TP2, respH_stimN_TP2, permCounter_TP2,...
+		permutation_TP2, bet_int2_respH_stimH_TP2, bet_int1_respF_stimH_TP2, bet_int1_respH_stimH_TP2);
+	
+	
+	
+	
+	% ---------- Store it into our responsesBasedOnStimuli store ----------
+	
+	% Create a matrix for this intensity
+	currentIntensityResponses = ...
+		[bet_int1_respF_stimF_TP1, bet_int1_respF_stimH_TP1, bet_int1_respF_stimF_TP2, bet_int1_respF_stimH_TP2;...
+		 bet_int1_respH_stimF_TP1, bet_int1_respH_stimH_TP1, bet_int1_respH_stimF_TP2, bet_int1_respH_stimH_TP2;...
+		 bet_int2_respF_stimF_TP1, bet_int2_respF_stimH_TP1, bet_int2_respF_stimF_TP2, bet_int2_respF_stimH_TP2;...
+		 bet_int2_respH_stimF_TP1, bet_int2_respH_stimH_TP1, bet_int2_respH_stimF_TP2, bet_int2_respH_stimH_TP2];
+		 
+	% Insert it into the responsesBasedOnStimuli store
+	responsesBasedOnStimuli(:,:,j) = currentIntensityResponses;
+	
+	% ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 end % End of for j = 1:length(intensities)
