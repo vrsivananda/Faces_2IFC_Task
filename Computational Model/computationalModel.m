@@ -82,6 +82,17 @@ for j = 1:length(intensities)
     indexCorrectH = pHsH_posterior_average > pFsH_posterior_average;
     indexCorrectF = pFsF_posterior_average > pHsF_posterior_average;
 	
+    % Number correct from each sample
+    nCorrectH = sum(indexCorrectH);
+    nCorrectF = sum(indexCorrectF);
+    % Combine them
+    nDiscCorrect = nCorrectH + nCorrectF;
+    % Calculate percentage correct for discrimination
+    percentDiscCorrect = nDiscCorrect/(2*nTrials);
+
+    % Insert into the array to store
+    percentDiscCorrect_All(j) = percentDiscCorrect;
+	
 	% vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 	% To classify the responses based on stimuli
 	
@@ -121,16 +132,6 @@ for j = 1:length(intensities)
 	
 	% ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    % Number correct from each sample
-    nCorrectH = sum(indexCorrectH);
-    nCorrectF = sum(indexCorrectF);
-    % Combine them
-    nDiscCorrect = nCorrectH + nCorrectF;
-    % Calculate percentage correct for discrimination
-    percentDiscCorrect = nDiscCorrect/(2*nTrials);
-
-    % Insert into the array to store
-    percentDiscCorrect_All(j) = percentDiscCorrect;
 
     % ----- Interval Betting -----
 
@@ -356,6 +357,14 @@ for j = 1:length(intensities)
 
 
 end % End of for j = 1:length(intensities)
+
+% vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+% Calculate the d's for all the intensities
+dPrime_array = calculateDPrimeArray(responsesBasedOnStimuli);
+	
+
+% ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 % Dashed lines parameters
 lineWidth = 0.5;
