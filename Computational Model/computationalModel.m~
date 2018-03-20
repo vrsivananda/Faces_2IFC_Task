@@ -3,12 +3,11 @@ clear;
 
 nTrials = 5000; % n Trials for each Happy/Fearful
 intensities = 0.01:0.01:1; % Intensities for targets start from 0.01 to 1
-theta = pi/4; % The angle between H and F distributions
 muNoise = [0,0];
-muSignalH = [cos(theta),sin(theta)];
+muSignalH = [0,1];
 muSignalF = [1,0];
-sigma = [0.01,0.01];
-noiseSigma = 0.0; % Gaussian noise to be added to interval betting
+sigma = [0.1,0.1];
+noiseSigma = 0.0; % For gaussian noise to be added to interval betting
 prior = 0.5; % Prior where chance of getting happy vs fearful is 0.5 for both
 
 % --- Prepare matrices to store data ---
@@ -38,8 +37,8 @@ for j = 1:length(intensities)
     % Target Present Interval
 
     % Get the samples from each distribution
-    sampleSH = mvnrnd(muSignalH.*intensities(j),sigma,nTrials); % [x,y] for each point from the Happy distribution at this intensity
-    sampleSF = mvnrnd(muSignalF.*intensities(j),sigma,nTrials); % [x,y] for each point from the Fearful distribution at this intensity
+    sampleSH = mvnrnd([0, intensities(j)],sigma,nTrials); % [x,y] for each point from the Happy distribution at this intensity
+    sampleSF = mvnrnd([intensities(j), 0],sigma,nTrials); % [x,y] for each point from the Fearful distribution at this intensity
 
     % Get the likelihoods of each sample being from each distribution/intensity
     for i = 1:length(intensities)
@@ -304,9 +303,9 @@ for j = 1:length(intensities)
     % Get the logical array where they bet on the correct TP
     currentCorrectBet = currentLogPosterior > 0;
     % Bet on first interval
-    bet_int1_respF_stimF_TP2 = sum(currentCorrectBet == 0);
+    bet_int1_respF_stimF_TP2 = sum(currentCorrectBet == 1);
     % Bet on second interval
-    bet_int2_respF_stimF_TP2 = sum(currentCorrectBet == 1);
+    bet_int2_respF_stimF_TP2 = sum(currentCorrectBet == 0);
     
     
     
@@ -321,9 +320,9 @@ for j = 1:length(intensities)
     % Get the logical array where they bet on the correct TP
     currentCorrectBet = currentLogPosterior > 0;
     % Bet on first interval
-    bet_int1_respH_stimF_TP2 = sum(currentCorrectBet == 0);
+    bet_int1_respH_stimF_TP2 = sum(currentCorrectBet == 1);
     % Bet on second interval
-    bet_int2_respH_stimF_TP2 = sum(currentCorrectBet == 1);
+    bet_int2_respH_stimF_TP2 = sum(currentCorrectBet == 0);
     
     
     % -- response F stimulus H --
@@ -337,9 +336,9 @@ for j = 1:length(intensities)
     % Get the logical array where they bet on the correct TP
     currentCorrectBet = currentLogPosterior > 0;
     % Bet on first interval
-    bet_int1_respF_stimH_TP2 = sum(currentCorrectBet == 0);
+    bet_int1_respF_stimH_TP2 = sum(currentCorrectBet == 1);
     % Bet on second interval
-    bet_int2_respF_stimH_TP2 = sum(currentCorrectBet == 1);
+    bet_int2_respF_stimH_TP2 = sum(currentCorrectBet == 0);
     
     
     % -- response H stimulus H --
@@ -353,9 +352,9 @@ for j = 1:length(intensities)
     % Get the logical array where they bet on the correct TP
     currentCorrectBet = currentLogPosterior > 0;
     % Bet on first interval
-    bet_int1_respH_stimH_TP2 = sum(currentCorrectBet == 0);
+    bet_int1_respH_stimH_TP2 = sum(currentCorrectBet == 1);
     % Bet on second interval
-    bet_int2_respH_stimH_TP2 = sum(currentCorrectBet == 1);
+    bet_int2_respH_stimH_TP2 = sum(currentCorrectBet == 0);
     
     	
 	% ---------- Store it into our responsesBasedOnStimuli store ----------
@@ -578,7 +577,7 @@ end % End of for j = 1:length(intensities)
 % Calculate the d's for all the intensities
 dPrime_array = calculateDPrimeArray(responsesBasedOnStimuli);
 
-% Load the variables from the subject data
+% Load the variables
 load('subject_dPrime_matrix.mat');
 load('subject_responsesBasedOnStimuli.mat');
 
@@ -623,6 +622,4 @@ hold on;
 scatter(sampleSF(:,1),sampleSF(:,2));
 hold on;
 scatter(sampleN(:,1),sampleN(:,2));
-xlim([-1 2]);
-ylim([-1 2]);
 

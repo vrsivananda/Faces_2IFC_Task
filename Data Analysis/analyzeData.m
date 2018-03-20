@@ -151,6 +151,9 @@ end % End of loop for each subject
 
 %------------PLOT DATA----------------
 
+% Calculate d' for each subject and intensity
+dPrime_matrix = calculateDPrimeArray(responsesBasedOnStimuliAll);
+
 % Plot the data for all the subjects
 plotMainAnalysisData(betTPIntervalDataAll,targetDiscriminationDataAll);
 
