@@ -5,7 +5,8 @@ function overallProbability = calculateOverallProbability(compModel_responsesBas
     
     % --- Convert the compModel_responsesBasedOnStimuli to probabilities ---
     
-    % Get the total responses per intensity
+    % Get the total responses per intensity (this is used to convert below
+    % into percentages)
     totalResponsesPerIntensity = sum(sum(compModel_responsesBasedOnStimuli(:,:,1)));
     
     % Convert all in the responses to probabilities
@@ -33,7 +34,7 @@ function overallProbability = calculateOverallProbability(compModel_responsesBas
             
         end % End of for col
         
-    end % End of for row 
+    end % End of for row
     
     % Get overall p(model|data) by multiplying all d' together per subject
     overallProbability = log(prod(products_All))';
