@@ -1,0 +1,331 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Face_Rating_Expt</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="../static/jsPsych-6.0.1/jspsych.js"></script>
+        <script src="../static/jsPsych-6.0.1/plugins/jspsych-html-keyboard-response.js"></script>
+        <script src="../static/jsPsych-6.0.1/plugins/jspsych-image-slider-response.js"></script>
+        <script src="../static/jsPsych-6.0.1/plugins/jspsych-instructions.js"></script>
+        <script src="sivaFaces.js"></script>
+        <link href="../static/jsPsych-6.0.1/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+        <link href="../static/css/jsscenter.css" rel="stylesheet" type="text/css"></link>
+        <!---------PsiTurk inserts start-------->
+        <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="../static/lib/underscore-min.js" type="text/javascript"> </script>
+        <script src="../static/lib/backbone-min.js" type="text/javascript"> </script>
+        <script src="../static/lib/d3.v3.min.js" type="text/javascript"> </script>
+        <!-- These variables are necessary to implement psiTurk -->
+        <script type="text/javascript">
+            // These fields provided by the psiTurk Server
+            var uniqueId = "{{ uniqueId }}"; // a unique string identifying the worker/task
+            var adServerLoc = "{{ adServerLoc }}"; // the location of your ad (so you can send user back at end of experiment)
+            var mode = "{{ mode }}"; // is this running live, sandbox, or in debug mode?
+        </script>
+        <!-- utils.js and psiturk.js provide the basic psiturk functionality -->
+        <script src="../static/js/utils.js" type="text/javascript"></script>
+        <script src="../static/js/psiturk.js" type="text/javascript"></script>
+        <!---------PsiTurk inserts end-------->
+    </head>
+    <body>
+    </body>
+    <script>
+    
+        //Data switches
+        var psiTurkIsOn = 1; //Set this to zero if testing locally (without PsiTurk)
+        var savingLocally = 0;
+        var displayData = 0;
+        var tableName = 'Face_Rating_Expt';
+        var folderName = 'Face_Rating_Expt';
+        
+        
+        // Load psiturk
+        if (psiTurkIsOn){
+          var psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
+        } 
+
+
+          //-------------------------------//
+         //-------Parameters Start--------//
+        //-------------------------------//
+
+        
+        //Styling variables
+        var maxWidth = 800;//How wide the instruction words can go in pixels
+        
+          //-----------------------------//
+         //-------Parameters End--------//
+        //-----------------------------//
+        
+        //Create a variable that stores all the faces in a map structure for easy accessibility
+        var faceMap = {}; //faceMap can be accessed like this: faceMap["H"]["01"], which returns an array
+        
+        //Fill in the faceMap
+        createFaceMap();
+        console.log(faceMap);
+        
+        //Parse out the 100s and store them in an array. Each element of the array is a face object
+        var happyFaceArray = parse100("H");
+        var fearfulFaceArray = parse100("F");
+        
+        console.log(happyFaceArray);
+        console.log(fearfulFaceArray);
+        
+        //Make the happy trials
+        var happyTrials = makeTrials(happyFaceArray,"happy");
+        var fearfulTrials = makeTrials(fearfulFaceArray,"fearful");
+
+        
+        console.log("fearfulTrials");
+        console.log(fearfulTrials);
+        
+        //Combine the trials and shuffle them
+        var allTrialsShuffled = jsPsych.randomization.shuffle(happyTrials.concat(fearfulTrials));
+
+        //Make the instructions
+        var instructions = makeInstructions();
+
+        //The timeline for the main experiment
+        var timeline = [];
+        timeline.push(instructions);
+        timeline.push({
+          type: 'image-slider-response',
+          timeline: allTrialsShuffled
+        });
+        timeline.push(makeDebriefPrompt());
+
+
+        //---------Run the experiment---------
+    
+        //Initiate the experiment
+        jsPsych.init({
+          timeline: timeline,
+          on_finish: function(){ //Execute this when the experiment finishes
+            if(savingLocally){
+              jsPsych.data.get().localSave('csv','testSave.csv'); //Save the data locally in a .csv file
+            }
+            if(displayData){
+              jsPsych.data.displayData(); //Display the data onto the browser screen
+            }
+            if(psiTurkIsOn){
+              psiturk.saveData({ 
+                success: function(){
+                  psiturk.completeHIT(); //Complete the HIT
+                }
+              });
+            }
+          },
+          on_trial_finish: function(){ //Execute this after every trial
+            console.log("--------");
+              //console.log(jsPsych.data.getLastTrialData());
+            if (psiTurkIsOn){
+              save_data(tableName, [jsPsych.data.get().last(1).values()[0]]);
+            }
+          }
+        });
+
+
+        //-------------------------------------
+        //------Functions below this line------
+        //-------------------------------------
+
+
+        //Parses the name of the image file and store it as an object. Object is returned
+        function parseName(image) {
+          // This part made by Steven Weiss, it's regex magic, just ignore it.
+          //note to self: this is just taking out certain characters and creating an array for each letter of "HFN"
+          var extractedGroups = image.match(/([HFN])([0-9]+)_([0-9]+)/);
+          //console.log(extractedGroups);
+          var category = extractedGroups[1];
+          // Treat zero intensity images as neutral
+          if (extractedGroups[3] == 0) {
+            category = "N";
+          }
+          //Return the object with the data that we want
+          return {
+            // "H" if happy, "F" if fearful, "N" if neutral
+            category: category,
+            person: extractedGroups[2],
+            intensity: extractedGroups[3],
+            image_file: image
+          };
+        }//End of parseName
+
+        //Function that uses faces.js to fill in the faceMap
+        function createFaceMap(){
+            //faces is an array of paths to individual images in faces.js
+            for (var i = 0; i < faces.length; i++) {
+              var face = parseName(faces[i]); //face is the object that is returned from the parseName function above
+              // Create the maps if they don't exist
+              if (!faceMap[face.category]) {
+                faceMap[face.category] = {}
+              }
+              if (!faceMap[face.category][face.person]) {
+                faceMap[face.category][face.person] = []
+              }
+              //Set the maps
+              faceMap[face.category][face.person].push(face.image_file);
+            }
+        }//End of faceMap
+        
+        //Function that filters out the 100 intensities of an emotion from the faceMap and stores it in an array
+        function parse100(emotionIndex){
+          
+          //Declare an array to store the faces
+          var tempArray = []
+          
+          //Get the object of the emotion containing all the arrays as values
+          var emotionObject = faceMap[emotionIndex];
+          
+          //Loop through all the values and filter out the 100 values
+          Object.entries(emotionObject).forEach(([key, val]) => {
+            
+            //Find the one with 100 intensity
+            var intensity100 = val[1];// 1 is the index of 100 intensity
+            
+            //Parse out the characteristics of the image
+            var faceObject = parseName(intensity100);
+            
+            //Push it into the temp array
+            tempArray.push(faceObject);
+            
+          });
+          
+          //Return the temp array
+          return tempArray;
+          
+        }//End of parse100
+        
+        //------Text-making functions-------
+
+        //Function that makes the instructions for the experiment
+        function makeInstructions(){
+            
+            var welcomeText = `<div style="max-width:${maxWidth}px;">` +
+            '<p>Welcome to the experiment!</p>' + 
+            '<p>To ensure proper presentation of images, <strong>please maximize the current window.</strong></p>' + 
+            '</div>';
+
+            var instructionsText1 = `<div style="max-width:${maxWidth}px; text-align:left;">` +
+            '<p>In this experiment, a happy or fearful face will be presented on the screen.</p>' +
+              '<p> You will then be asked to rate how much fear or happiness the face is exhibiting. There will be a slider below the face which you can use to rate the face. </p>' +
+              '<p>If it is a <b>happy</b> face, the left side of the slider will be marked <i>"Completely neutral"</i> and the right side of the slider will be marked <i>"Most possible <b>happiness</b> that a person can exhibit"</i>. </p>' +
+              '<p>If it is a <b>fearful</b> face, the left side of the slider will still be marked <i>"Completely neutral"</i> but the right side of the slider will be marked <i>"Most possible <b>fear</b> that a person can exhibit"</i>.</p>' +
+              '<p>Drag the slider based on how much you think the face exhibited that emotion. Once you are satisfied with the position of the slider, press the "Continue" button to move on to the next face.</p>' +
+              '<div>';
+              
+            var instructionsText2 =  `<div style="max-width:${maxWidth}px; text-align:left;">` +
+              '<p> <u>Steps in the experiment:</u></p>' +
+              '<p> 1. Look at the face.</p>'+
+              '<p> 2. Slide the slider based on your evaluation of the emotion exhibited.</p>' +
+              '<p> 3. Press the "Continue" button.</p>' +
+              '</div>';
+
+            return {
+                type: 'instructions',
+                pages: [
+                    welcomeText,
+                    instructionsText1,
+                    instructionsText2
+                ],
+                show_clickable_nav: true
+            };
+        }//End of makeInstructions()
+        
+        //Function that makes the instructions for the experiment
+        function makeDebriefPrompt(){
+            
+            var endText = `<div style="max-width:${maxWidth}px;">` +
+            '<p>You are done!</p>' + 
+            '<p>Please click "next" to submit the HIT.</strong></p>' + 
+            '</div>';
+
+            return {
+                type: 'instructions',
+                pages: [endText],
+                show_clickable_nav: true
+            };
+        }//End of makeInstructions()
+        
+        //Function to make trials based on their emotion
+        function makeTrials(array, emotion){
+          
+          //Array to store the trials
+          var tempArray = [];
+          
+          //Determine the labels on the slider
+          var labelInsert = (emotion == "happy") ? "happiness" : "fear";
+          
+          //Make the label
+          var labels = ["Completely neutral", "Most possible <b>" + labelInsert + "</b> that a person could exhibit"];
+          
+          //Make a generic trial object
+          var trialObject = {
+            type: 'image-slider-response',
+            stimulus: '',
+            labels: labels,
+            prompt: `Drag the slider based on how much <b>${labelInsert}</b> this person exhibits.<br/>`,
+            start: 0,
+            emotion: emotion,
+            on_finish: function(){
+              //Save the person data
+              jsPsych.data.get().addToLast({person: this.person});
+              jsPsych.data.get().addToLast({emotion: this.emotion});
+            }
+          };
+          
+          //For loop that goes through the array of face objects
+          for (var i  = 0; i < array.length; i++){
+            
+            //Make a copy of the trial object
+            var curentTrialObject = Object.assign({},trialObject);
+            
+            //Load in the current object
+            var currentFaceObject = array[i];
+            
+            //Get the values that we want to store as data
+            var person = currentFaceObject.person;
+            
+            //Add the person data into the trialObject
+            curentTrialObject.person = person;
+            
+            //Add in the stimuli for the trial object
+            curentTrialObject.stimulus = currentFaceObject.image_file;
+            
+            //Push the trial Object into the tempArray
+            tempArray.push(curentTrialObject);
+            
+          }//End of for loop
+          
+          //Return the tempArray
+          return tempArray;
+          
+        }//End of makeTrials
+        
+        //------psiTurk Functions Begin------
+    
+        //A function to save the data to the SQL table on the psiturk server.  This gets called at the end of the file.
+        function save_data(data_table,data){
+          
+          //Add data to the jsPsych data file
+          jsPsych.data.addProperties({subject: psiturk.taskdata.get('workerId')});
+          
+          //Use AJAX to post the data onto the psiturk server
+          $.ajax({
+            type:'post',
+            cache: false,
+            url: 'https://psiturk.psych.ucla.edu/~odegaard/' + folderName + '/templates/savedata.php',
+            data: {
+              table: data_table,
+              json: JSON.stringify(data),
+            },
+            success: function(output) { console.log(output); } // write the result to javascript console
+          });
+        }
+        
+        //------psiTurk Functions End------
+
+
+
+    </script>
+</html>

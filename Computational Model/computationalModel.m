@@ -10,7 +10,7 @@ muNoise = [0,0];
 muSignalH = [cos(theta),sin(theta)];
 muSignalF = [1,0];
 sigma = [0.1,0.1];
-noiseSigmas = 0:0.1:0; % Gaussian noise to be added to interval betting
+type2NoiseSigmas = 0:0.1:0; % Gaussian noise to be added to interval betting
 prior = 0.5; % Prior where chance of getting happy vs fearful is 0.5 for both
 
 % Load the variables from the subject data
@@ -32,20 +32,20 @@ percentDiscCorrect_currentNoise   = nan(length(intensities),1);
 percentBetTPInterval_currentNoise = nan(length(intensities),1);
 
 % Outer loop stores (for h)
-percentDiscCorrect_All = nan(length(intensities),length(noiseSigmas));
-percentBetTPInterval_All = nan(length(intensities),length(noiseSigmas));
-overallProbability_All = nan(size(subject_dPrime_matrix,2),length(noiseSigmas));
-BIC_All = nan(size(subject_dPrime_matrix,2),length(noiseSigmas));
+percentDiscCorrect_All = nan(length(intensities),length(type2NoiseSigmas));
+percentBetTPInterval_All = nan(length(intensities),length(type2NoiseSigmas));
+overallProbability_All = nan(size(subject_dPrime_matrix,2),length(type2NoiseSigmas));
+BIC_All = nan(size(subject_dPrime_matrix,2),length(type2NoiseSigmas));
 
 % Store for the responses based on stimuli
 compModel_responsesBasedOnStimuli = nan(4, 4, length(intensities));
 % ^ This is a (4 x 4 x length(intensities)) dimensional matrix
 
 % For loop that loops through the noise levels
-for h = 1:length(noiseSigmas)
+for h = 1:length(type2NoiseSigmas)
     
     % Load in the current sigma
-    currentNoiseSigma = noiseSigmas(h);
+    currentType2NoiseSigma = type2NoiseSigmas(h);
 
     % For loop that loops through the intensities
     for j = 1:length(intensities)
@@ -472,10 +472,10 @@ lineStyle = '--';
 % --- Draw the graph ---
 figure;
 % Plot the lines for each noise level
-for h = 1:length(noiseSigmas)
+for h = 1:length(type2NoiseSigmas)
     hold on;
     plot(percentDiscCorrect_All(:,h), percentBetTPInterval_All(:,h));
-    legendInfo{h} = ['noiseSigma = ' num2str(noiseSigmas(h))];
+    legendInfo{h} = ['noiseSigma = ' num2str(type2NoiseSigmas(h))];
 end
 legend(legendInfo,'Location','NorthWest');
 xlim([0 1]);
@@ -503,13 +503,13 @@ plot([0, 1], [0, 1],'LineStyle',lineStyle,'LineWidth',lineWidth);
 figure;
 
 % Plot the lines for each subject level
-for i = 1:size(overallProbability_All,2)
+for i = 1:size(overallProbability_All,1)
     hold on;
-    plot(noiseSigmas', overallProbability_All(i,:));
+    plot(type2NoiseSigmas', overallProbability_All(i,:));
     %legendInfo{h} = ['subject = ' num2str(noiseSigmas(h))];
 end
 %legend(legendInfo,'Location','NorthWest');
-xlim([min(noiseSigmas) max(noiseSigmas)]);
+xlim([min(type2NoiseSigmas) max(type2NoiseSigmas)]);
 %ylim([0 1]);
 xlabel('Type2 Noise Level');
 ylabel('Log Likelihood');
