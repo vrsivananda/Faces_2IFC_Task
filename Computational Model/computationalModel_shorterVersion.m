@@ -8,7 +8,7 @@ rng('shuffle');
 
 % PARAMETERS
 nTrials = 5000; % n Trials for each Happy/Fearful
-type2NoiseSigmas = 0:1:10;
+type2NoiseSigmas = 0:1:1;
 sigma = [0.1,0.1];
 muNoise = [0,0];
 intensities = 0.01:0.01:1; % Intensities for marginalization start from 0.01 to 1
@@ -388,6 +388,14 @@ for h = 1:nSubjects
     
 end % End of h = 1:nSubjects
 
+% ======== t-test ========
+firstLL_All = overallLL_All(:,1);
+lastLL_All = overallLL_All(:,end);
+
+[h,p,ci,stats] = ttest(firstLL_All, lastLL_All);
+
+% ======== PLOTTING ========
+ 
 figure;
 
 % Plot the lines for each subject level

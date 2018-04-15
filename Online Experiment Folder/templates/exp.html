@@ -33,11 +33,12 @@
     <script>
     
         //Data switches
-        var psiTurkIsOn = 1; //Set this to zero if testing locally (without PsiTurk)
+        var psiTurkIsOn = 0; //Set this to zero if testing locally (without PsiTurk)
         var savingLocally = 0;
         var displayData = 0;
-        var tableName = 'Faces_2IFC_Task';
-        var folderName = 'Faces_2IFC_Task';
+        var username = '';
+        var tableName = '';
+        var folderName = '';
         
         
         // Load psiturk
@@ -1141,7 +1142,7 @@
           $.ajax({
             type:'post',
             cache: false,
-            url: 'https://psiturk.psych.ucla.edu/~odegaard/' + folderName + '/templates/savedata.php',
+            url: 'https://psiturk.psych.ucla.edu/~' + username + '/' + folderName + '/templates/savedata.php',
             data: {
               table: data_table,
               json: JSON.stringify(data),
