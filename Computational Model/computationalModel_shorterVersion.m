@@ -411,8 +411,8 @@ end
 %legend(legendInfo,'Location','NorthWest');
 xlim([min(type2NoiseSigmas) max(type2NoiseSigmas)]);
 ylim([min(min(overallLL_All))-1, max(max(overallLL_All))+1]);
-xlabel('Type2 Noise Level');
-ylabel('Log Likelihood');
+xlabel('Type 2 noise level (\sigma)');
+ylabel('L_{m}(\phi|data)');
 
 % Plot the graph
 figure;

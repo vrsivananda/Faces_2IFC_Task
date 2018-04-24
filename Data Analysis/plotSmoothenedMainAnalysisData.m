@@ -1,8 +1,5 @@
 function plotSmoothenedMainAnalysisData(betTPIntervalDataAll,targetDiscriminationDataAll)
 
-% Add the path to the boundedLine function
-addpath('/boundedLinePackage/boundedline');
-
 % New figure
 figure;
 
@@ -27,7 +24,6 @@ betTPIntervalValues = betTPIntervalDataAll(1,:,:); % This is a 2d plane
 y = betTPIntervalValues(:);
 
 % Smooth the data
-%fitObject = fit(x,y,'smoothing','SmoothingParam',smoothingParameter);
 fitObject = fit(x,y,'smoothingspline','SmoothingParam',smoothingParameter);
 
 
