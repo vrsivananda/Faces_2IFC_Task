@@ -243,7 +243,7 @@ for h = 1:length(type2NoiseSigmas)
         sN_counter = sN_counter + length(respF_stimF_TP1);
         % Get the log of this posterior against the noise distribution, with
         % some Gaussian noise added
-        currentLogPosterior = log(respF_stimF_TP1./currentNoisePosterior) + normrnd(0,currentNoiseSigma,[length(respF_stimF_TP1),1]);
+        currentLogPosterior = log(respF_stimF_TP1./currentNoisePosterior) + normrnd(0,currentType2NoiseSigma,[length(respF_stimF_TP1),1]);
         % Get the logical array where they bet on the correct TP
         currentCorrectBet = currentLogPosterior > 0;
         % Bet on first interval
@@ -259,7 +259,7 @@ for h = 1:length(type2NoiseSigmas)
         sN_counter = sN_counter + length(respH_stimF_TP1);
         % Get the log of this posterior against the noise distribution, with
         % some Gaussian noise added
-        currentLogPosterior = log(respH_stimF_TP1./currentNoisePosterior) + normrnd(0,currentNoiseSigma,[length(respH_stimF_TP1),1]);
+        currentLogPosterior = log(respH_stimF_TP1./currentNoisePosterior) + normrnd(0,currentType2NoiseSigma,[length(respH_stimF_TP1),1]);
         % Get the logical array where they bet on the correct TP
         currentCorrectBet = currentLogPosterior > 0;
         % Bet on first interval
@@ -275,7 +275,7 @@ for h = 1:length(type2NoiseSigmas)
         sN_counter = sN_counter + length(respF_stimH_TP1);
         % Get the log of this posterior against the noise distribution, with
         % some Gaussian noise added
-        currentLogPosterior = log(respF_stimH_TP1./currentNoisePosterior) + normrnd(0,currentNoiseSigma,[length(respF_stimH_TP1),1]);
+        currentLogPosterior = log(respF_stimH_TP1./currentNoisePosterior) + normrnd(0,currentType2NoiseSigma,[length(respF_stimH_TP1),1]);
         % Get the logical array where they bet on the correct TP
         currentCorrectBet = currentLogPosterior > 0;
         % Bet on first interval
@@ -291,7 +291,7 @@ for h = 1:length(type2NoiseSigmas)
         sN_counter = sN_counter + length(respH_stimH_TP1);
         % Get the log of this posterior against the noise distribution, with
         % some Gaussian noise added
-        currentLogPosterior = log(respH_stimH_TP1./currentNoisePosterior) + normrnd(0,currentNoiseSigma,[length(respH_stimH_TP1),1]);
+        currentLogPosterior = log(respH_stimH_TP1./currentNoisePosterior) + normrnd(0,currentType2NoiseSigma,[length(respH_stimH_TP1),1]);
         % Get the logical array where they bet on the correct TP
         currentCorrectBet = currentLogPosterior > 0;
         % Bet on first interval
@@ -326,7 +326,7 @@ for h = 1:length(type2NoiseSigmas)
         sN_counter = sN_counter + length(respF_stimF_TP2);
         % Get the log of this posterior against the noise distribution, with
         % some Gaussian noise added
-        currentLogPosterior = log(respF_stimF_TP2./currentNoisePosterior) + normrnd(0,currentNoiseSigma,[length(respF_stimF_TP2),1]);
+        currentLogPosterior = log(respF_stimF_TP2./currentNoisePosterior) + normrnd(0,currentType2NoiseSigma,[length(respF_stimF_TP2),1]);
         % Get the logical array where they bet on the correct TP
         currentCorrectBet = currentLogPosterior > 0;
         % Bet on first interval
@@ -343,7 +343,7 @@ for h = 1:length(type2NoiseSigmas)
         sN_counter = sN_counter + length(respH_stimF_TP2);
         % Get the log of this posterior against the noise distribution, with
         % some Gaussian noise added
-        currentLogPosterior = log(respH_stimF_TP2./currentNoisePosterior) + normrnd(0,currentNoiseSigma,[length(respH_stimF_TP2),1]);
+        currentLogPosterior = log(respH_stimF_TP2./currentNoisePosterior) + normrnd(0,currentType2NoiseSigma,[length(respH_stimF_TP2),1]);
         % Get the logical array where they bet on the correct TP
         currentCorrectBet = currentLogPosterior > 0;
         % Bet on first interval
@@ -359,7 +359,7 @@ for h = 1:length(type2NoiseSigmas)
         sN_counter = sN_counter + length(respF_stimH_TP2);
         % Get the log of this posterior against the noise distribution, with
         % some Gaussian noise added
-        currentLogPosterior = log(respF_stimH_TP2./currentNoisePosterior) + normrnd(0,currentNoiseSigma,[length(respF_stimH_TP2),1]);
+        currentLogPosterior = log(respF_stimH_TP2./currentNoisePosterior) + normrnd(0,currentType2NoiseSigma,[length(respF_stimH_TP2),1]);
         % Get the logical array where they bet on the correct TP
         currentCorrectBet = currentLogPosterior > 0;
         % Bet on first interval
@@ -375,7 +375,7 @@ for h = 1:length(type2NoiseSigmas)
         sN_counter = sN_counter + length(respH_stimH_TP2);
         % Get the log of this posterior against the noise distribution, with
         % some Gaussian noise added
-        currentLogPosterior = log(respH_stimH_TP2./currentNoisePosterior) + normrnd(0,currentNoiseSigma,[length(respH_stimH_TP2),1]);
+        currentLogPosterior = log(respH_stimH_TP2./currentNoisePosterior) + normrnd(0,currentType2NoiseSigma,[length(respH_stimH_TP2),1]);
         % Get the logical array where they bet on the correct TP
         currentCorrectBet = currentLogPosterior > 0;
         % Bet on first interval
@@ -443,7 +443,7 @@ for h = 1:length(type2NoiseSigmas)
     overallProbability = calculateOverallProbability(compModel_responsesBasedOnStimuli, subject_responsesBasedOnStimuli, matchingDPrimeIndex);
     
     % Determine the k parameter for BIC
-    if(currentNoiseSigma == 0)
+    if(currentType2NoiseSigma == 0)
         BIC_k_parameter = 0;
     else
         BIC_k_parameter = 1;
@@ -474,12 +474,14 @@ figure;
 % Plot the lines for each noise level
 for h = 1:length(type2NoiseSigmas)
     hold on;
-    plot(percentDiscCorrect_All(:,h), percentBetTPInterval_All(:,h));
+    h1 = plot(percentDiscCorrect_All(:,h), percentBetTPInterval_All(:,h));
     legendInfo{h} = ['noiseSigma = ' num2str(type2NoiseSigmas(h))];
 end
-legend(legendInfo,'Location','NorthWest');
-xlim([0 1]);
-ylim([0 1]);
+set(h1,'color','k');
+set(h1,'lineWidth',4);
+%legend(legendInfo,'Location','NorthWest');
+xlim([0.25 1]);
+ylim([0.25 1]);
 xlabel('Target discrimination % correct');
 ylabel('% bet on target-present interval');
 
@@ -487,15 +489,15 @@ ylabel('% bet on target-present interval');
 
 % line for when y = 0.5
 hold on;
-plot([0, 1], [0.5, 0.5],'LineStyle',lineStyle,'LineWidth',lineWidth);
+plot([0, 1], [0.5, 0.5],'LineStyle',lineStyle,'LineWidth',lineWidth,'Color','k');
 
 % line for when x = 0.5
 hold on;
-plot([0.5, 0.5], [0, 1],'LineStyle',lineStyle,'LineWidth',lineWidth);
+plot([0.5, 0.5], [0, 1],'LineStyle',lineStyle,'LineWidth',lineWidth,'Color','k');
 
 % line for when x = y
 hold on;
-plot([0, 1], [0, 1],'LineStyle',lineStyle,'LineWidth',lineWidth);
+plot([0, 1], [0, 1],'LineStyle',lineStyle,'LineWidth',lineWidth,'Color','k');
 
 
 % ==================== PLOT 2 ====================

@@ -416,12 +416,11 @@ ylabel('Log Likelihood');
 
 % Plot the graph
 figure;
-h1 = boundedline(type2NoiseSigmas', mean(overallLL_All),std(overallLL_All)./sqrt(nSubjects),'alpha','cmap',[0 0 0]);
-set(h1, 'lineWidth', 4);
+boundedline(type2NoiseSigmas', mean(overallLL_All),std(overallLL_All)./sqrt(nSubjects),'alpha');
 xlim([min(type2NoiseSigmas) max(type2NoiseSigmas)]);
-ylim([-308, -302]);
-xlabel('Type 2 noise level (\sigma)');
-ylabel('L_{m}(\phi|data)');
+ylim([-308, max(max(overallLL_All))+1]);
+xlabel('Type2 Noise Level');
+ylabel('Log Likelihood');
 
 
 toc

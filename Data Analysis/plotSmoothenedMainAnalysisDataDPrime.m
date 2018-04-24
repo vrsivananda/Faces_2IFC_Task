@@ -1,5 +1,8 @@
 function plotSmoothenedMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll)
 
+% Add the path to the boundedLine function
+addpath('/boundedLinePackage/boundedline');
+
 % New figure
 figure;
 
@@ -7,7 +10,7 @@ figure;
 smoothingParameter = 0.99;
 
 % Parameters
-markerSize = 20;
+markerSize = 30;
 %markerColor = 'b';
 markerType = '.';
 minX = -1;

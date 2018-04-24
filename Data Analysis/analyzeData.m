@@ -47,7 +47,7 @@ validSubjectIds = {};
 betTPIntervalDataAll = [];
 targetDiscriminationDataAll = [];
 type1SDTDataAll = [];
-neutralFacesDataAll = []; % This is (4 x 1 x nSubjects) dimensional (only 1 column)
+neutralFacesDataAll = []; % This is (6 x 1 x nSubjects) dimensional (only 1 column)
 responsesBasedOnStimuliAll = []; 
 % ^ This is a (4 x 4 x length(intensities) x nSubjects) dimensional matrix
 
@@ -106,6 +106,8 @@ for i = 1:numberOfSubjects
     % 2nd row: proportion Fearful response
     % 3rd row: nValidNeutralTrials
     % 4th row: nInvalidNeutralTrials
+    % 5th row: d'
+    % 6th row: c
     
     % Responses based on stimuli
     responsesBasedOnStimuli = getResponsesBasedOnStimuli(dataStructure,intensities);
@@ -170,4 +172,10 @@ plotSmoothenedMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll);
 plotType1SDTData(type1SDTDataAll, intensities);
 
 % Plot the neutral Faces Data
-plotNeutralFacesData(neutralFacesData);
+plotNeutralFacesData(neutralFacesDataAll);
+
+% Plot the percentage correct for Type 1
+plotType1Correct(targetDiscriminationDataAll);
+
+% Plot the percentage correct for Type 2
+plotType2Correct(betTPIntervalDataAll);
