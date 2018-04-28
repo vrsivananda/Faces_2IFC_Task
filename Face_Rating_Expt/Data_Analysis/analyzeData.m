@@ -1,7 +1,3 @@
-% This script goes through the data, subject-by-subject, and analyzes them. 
-% This analyzes the data in a data structure form by default, but you can
-% change it to analyze the cell array or other data if you have it
-
 clear;
 close all;
 
@@ -28,10 +24,6 @@ for i = 1:numberOfSubjects
     Alldata = load([pwd '/Data/structure_data_' subjectId '.mat']);
     % Data structure that contains all the data for this subject
     dataStructure = Alldata.data;
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%% Your analysis here %%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % Go through the data and fill in the matrix
     for j = 1:length(dataStructure.rt)

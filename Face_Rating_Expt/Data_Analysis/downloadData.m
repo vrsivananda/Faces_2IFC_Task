@@ -1,28 +1,16 @@
-% This function downloads all the data from your experiment
-% subject-by-subject and stores them in 2 forms: 
-% (1) Cell Array, and 
-% (2) Data Structure
-% This was done such that you have all your data locally and can run any
-% analyses on them. If you post this data online, other researchers can
-% also run their own analyses on them.
-%
-% You can then make another script to analyze the data from there, or you
-% can modify this file to download the data based on what you need
 
 clear;
 close all;
 
 % Add the java file that you'll need to use to connect to the database
-% (This needs to be in the same directory or have the path added)
-% Get this file from the Oracle website if you don't have it otherwise.
 javaaddpath('mysql-connector-java-5.1.42-bin.jar');
 
 % Create a connection object by connecting to our SQL database.
-databaseUsername = 'qualia_01';
-databasePassword = 'Bgt5kn|e';
-databaseName = 'psych_qualia';
-tableName = 'Face_Rating_Expt';
-serverAddess = 'psiturk.psych.ucla.edu';
+databaseUsername = '';
+databasePassword = '';
+databaseName = '';
+tableName = '';
+serverAddess = '';
 conn = database(databaseName,databaseUsername,databasePassword,'Vendor','MySQL',...
     'Server',serverAddess);
 

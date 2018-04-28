@@ -45,6 +45,4 @@ function [permCounter, betTP_counter, betTA_respF_counter, betTA_respH_counter] 
 		
 	end % End of for loop for respH_stimH_TP1
 	
-	%output = [permCounter, betTP_counter, betTA_respH_counter, betTA_respF_counter];
-	
 end % End of function

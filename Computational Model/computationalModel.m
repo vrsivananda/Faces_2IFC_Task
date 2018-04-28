@@ -399,12 +399,7 @@ for h = 1:length(type2NoiseSigmas)
 
         % ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-        % They bet on the target present interval when the posterior of the target
-        % present interval > posterior of target absent interval
-        %betTPIndices = log_posterior_average_comparisons > 0;
-
         % Number of bets on TP Interval
-        %nBetTP = sum(betTPIndices);
         nBetTP = bet_int1_respF_stimF_TP1 + ...
                  bet_int1_respF_stimH_TP1 + ...
                  bet_int1_respH_stimF_TP1 + ...
