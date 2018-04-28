@@ -1,4 +1,4 @@
-function plotType1SDTData(type1SDTDataAll, intensities)
+function plotType1SDTData(neutralFacesDataAll, type1SDTDataAll, intensities)
 
 % Parameters
 markerSize = 20;
@@ -16,6 +16,9 @@ numberOfSubjects = size(type1SDTDataAll,3);
 % Preallocate legend cell array
 legendCellArray = cell(numberOfSubjects,1);
 
+% Prepare the arrays for plotting
+intensities = [0 intensities];
+
 %---- d' ----
 
 % Plot on a new figure
@@ -31,7 +34,7 @@ maxY = max(max(type1SDTDataAll(1,:,:)));
 for i = 1:numberOfSubjects
 
     % Get the data for this subject
-    dPrime = type1SDTDataAll(1,:,i);
+    dPrime = [neutralFacesDataAll(5,1,i) type1SDTDataAll(1,:,i)];
     
     % Plot the data
     plot(intensities,dPrime,'Marker',markerType,...
@@ -46,7 +49,7 @@ for i = 1:numberOfSubjects
 end % End of for loop for each subject
 
 % line for when y = 0
-plot([minX-xLimBuffer maxX+xLimBuffer], [0, 0],'LineStyle',lineStyle,'LineWidth',lineWidth);
+plot([minX-xLimBuffer maxX+xLimBuffer], [0, 0],'LineStyle',lineStyle,'LineWidth',lineWidth, 'Color', 'k');
 
 % Hold off so that we end the plotting on the same graph
 hold off;
@@ -74,14 +77,14 @@ figure;
 % Calculate the min and max x and y values
 minX = min(intensities);
 maxX = max(intensities);
-minY = min(min(type1SDTDataAll(2,:,:)));
-maxY = max(max(type1SDTDataAll(2,:,:)));
+minY = min(min(-[neutralFacesDataAll(6,:,:), type1SDTDataAll(2,:,:)]));
+maxY = max(max(-[neutralFacesDataAll(6,:,:), type1SDTDataAll(2,:,:)]));
 
 % Loop through each subject and plot the data
 for i = 1:numberOfSubjects
 
     % Get the data for this subject
-    c = type1SDTDataAll(2,:,i);
+    c = -[neutralFacesDataAll(6,1,i), type1SDTDataAll(2,:,i)];
     
     % Plot the data
     plot(intensities,c,'Marker',markerType,...
@@ -93,7 +96,7 @@ for i = 1:numberOfSubjects
 end % End of for loop for each subject
 
 % line for when y = 0
-plot([minX-xLimBuffer maxX+xLimBuffer], [0, 0],'LineStyle',lineStyle,'LineWidth',lineWidth);
+plot([minX-xLimBuffer maxX+xLimBuffer], [0, 0],'LineStyle',lineStyle,'LineWidth',lineWidth, 'Color', 'k');
 
 % Hold off so that we end the plotting on the same graph
 hold off;

@@ -169,7 +169,7 @@ plotMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll);
 plotSmoothenedMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll);
 
 % Plot the Type1 SDT data
-plotType1SDTData(type1SDTDataAll, intensities);
+plotType1SDTData(neutralFacesDataAll, type1SDTDataAll, intensities);
 
 % Plot the neutral Faces Data
 plotNeutralFacesData(neutralFacesDataAll);
