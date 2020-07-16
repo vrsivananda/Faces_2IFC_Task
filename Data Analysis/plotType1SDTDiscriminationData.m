@@ -1,4 +1,4 @@
-function plotType1SDTData(neutralFacesDataAll, type1SDTDataAll, intensities)
+function plotType1SDTDiscriminationData(neutralFacesDataAll, type1SDTDiscriminationDataAll, intensities)
 
 % Parameters
 markerSize = 20;
@@ -11,7 +11,7 @@ lineWidth = 1;
 lineStyle = '--';
 
 % Get the number of subjects
-numberOfSubjects = size(type1SDTDataAll,3);
+numberOfSubjects = size(type1SDTDiscriminationDataAll,3);
 
 % Preallocate legend cell array
 legendCellArray = cell(numberOfSubjects,1);
@@ -21,20 +21,23 @@ intensities = [0 intensities];
 
 %---- d' ----
 
+% Divide d' by sqrt(2)
+type1SDTDiscriminationDataAll = type1SDTDiscriminationDataAll./sqrt(2);
+
 % Plot on a new figure
 figure;
 
 % Calculate the min and max x and y values
 minX = min(intensities);
 maxX = max(intensities);
-minY = min(min(type1SDTDataAll(1,:,:)));
-maxY = max(max(type1SDTDataAll(1,:,:)));
+minY = min(min(type1SDTDiscriminationDataAll(1,:,:)));
+maxY = max(max(type1SDTDiscriminationDataAll(1,:,:)));
 
 % Loop through each subject and plot the data
 for i = 1:numberOfSubjects
 
     % Get the data for this subject
-    dPrime = [neutralFacesDataAll(5,1,i) type1SDTDataAll(1,:,i)];
+    dPrime = [neutralFacesDataAll(5,1,i) type1SDTDiscriminationDataAll(1,:,i)];
     
     % Plot the data
     plot(intensities,dPrime,'Marker',markerType,...
@@ -60,7 +63,7 @@ ylim([minY-yLimBuffer maxY+yLimBuffer]);
 
 % Set the axis labels
 xlabel('intensities');
-ylabel('d''');
+ylabel('d''/sqrt(2)');
 
 % Set the x-ticks
 xticks(intensities);
@@ -77,14 +80,14 @@ figure;
 % Calculate the min and max x and y values
 minX = min(intensities);
 maxX = max(intensities);
-minY = min(min(-[neutralFacesDataAll(6,:,:), type1SDTDataAll(2,:,:)]));
-maxY = max(max(-[neutralFacesDataAll(6,:,:), type1SDTDataAll(2,:,:)]));
+minY = min(min(-[neutralFacesDataAll(6,:,:), type1SDTDiscriminationDataAll(2,:,:)]));
+maxY = max(max(-[neutralFacesDataAll(6,:,:), type1SDTDiscriminationDataAll(2,:,:)]));
 
 % Loop through each subject and plot the data
 for i = 1:numberOfSubjects
 
     % Get the data for this subject
-    c = -[neutralFacesDataAll(6,1,i), type1SDTDataAll(2,:,i)];
+    c = -[neutralFacesDataAll(6,1,i), type1SDTDiscriminationDataAll(2,:,i)];
     
     % Plot the data
     plot(intensities,c,'Marker',markerType,...

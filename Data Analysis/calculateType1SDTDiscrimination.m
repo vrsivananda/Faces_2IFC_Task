@@ -1,4 +1,4 @@
-function type1SDTData = calculateType1SDT(dataStructure, intensities)
+function type1SDTDiscriminationData = calculateType1SDTDiscrimination(dataStructure, intensities)
 
 %----Variables to keep track of data----
 
@@ -113,6 +113,6 @@ c = -(0.5)*(zHR + zFAR);
 %----Consolidate the data and return----
 
 % Return the data
-type1SDTData = [dPrime;...
-                c;...
-                nValidTargetDiscriminationTrials];
+type1SDTDiscriminationData = [dPrime;...
+                              c;...
+                              nValidTargetDiscriminationTrials];

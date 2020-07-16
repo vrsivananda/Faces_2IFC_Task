@@ -46,7 +46,8 @@ validSubjectIds = {};
 % Each 2D sheet is a subject, depth is multiple subjects
 betTPIntervalDataAll = [];
 targetDiscriminationDataAll = [];
-type1SDTDataAll = [];
+type1SDTDetectionDataAll = [];
+type1SDTDiscriminationDataAll = [];
 neutralFacesDataAll = []; % This is (6 x 1 x nSubjects) dimensional (only 1 column)
 responsesBasedOnStimuliAll = []; 
 % ^ This is a (4 x 4 x length(intensities) x nSubjects) dimensional matrix
@@ -93,11 +94,16 @@ for i = 1:numberOfSubjects
     % ^ Same form as above
     
     % SDT
-    type1SDTData = calculateType1SDT(dataStructure, intensities);
+    type1SDTDiscriminationData = calculateType1SDTDiscrimination(dataStructure, intensities);
     % ^ In the form:
     % 1st row: d'
     % 2nd row: c
     % 3rd row: nValidDiscriminationTrials
+    type1SDTDetectionData = calculateType1SDTDetection(dataStructure, intensities);
+    % ^ In the form:
+    % 1st row: d'
+    % 2nd row: c
+    % 3rd row: nValidDetectionTrials
     
     % Neutral faces
     neutralFacesData = analyzeNeutralFaces(dataStructure);
@@ -142,16 +148,20 @@ for i = 1:numberOfSubjects
         % Add another sheet (3rd dimension) for each subject
         betTPIntervalDataAll(:,:,nValidSubjects) = betTPIntervalData;
         targetDiscriminationDataAll(:,:,nValidSubjects) = targetDiscriminationData;
-        type1SDTDataAll(:,:,nValidSubjects) = type1SDTData;
+        type1SDTDetectionDataAll(:,:,nValidSubjects) = type1SDTDetectionData;
+        type1SDTDiscriminationDataAll(:,:,nValidSubjects) = type1SDTDiscriminationData;
         neutralFacesDataAll(:,:,nValidSubjects) = neutralFacesData;
 		responsesBasedOnStimuliAll(:,:,:,nValidSubjects) = responsesBasedOnStimuli;
-		% ^ 4D matrix
+		% ^ 3D matrix
     
     end
     
 end % End of loop for each subject
 
 %------------PLOT DATA----------------
+
+% Plot the 3 d'detection vs d'discrimination/sqrt(2) figures
+plotDetectionVsDiscriminationData(type1SDTDetectionDataAll, type1SDTDiscriminationDataAll);
 
 % Calculate d' for each subject and intensity
 dPrime_matrix = calculateDPrimeArray(responsesBasedOnStimuliAll);
@@ -163,13 +173,14 @@ plotMainAnalysisData(betTPIntervalDataAll,targetDiscriminationDataAll);
 plotSmoothenedMainAnalysisData(betTPIntervalDataAll,targetDiscriminationDataAll);
 
 % Plot the data for all the subjects using d' as x-axis
-plotMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll);
+plotMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDetectionDataAll);
 
 % Plot the data for all the subjects using d' as x-axis
-plotSmoothenedMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDataAll);
+plotSmoothenedMainAnalysisDataDPrime(betTPIntervalDataAll,type1SDTDetectionDataAll);
 
 % Plot the Type1 SDT data
-plotType1SDTData(neutralFacesDataAll, type1SDTDataAll, intensities);
+plotType1SDTDetectionData(neutralFacesDataAll, type1SDTDetectionDataAll, intensities);
+plotType1SDTDiscriminationData(neutralFacesDataAll, type1SDTDiscriminationDataAll, intensities);
 
 % Plot the neutral Faces Data
 plotNeutralFacesData(neutralFacesDataAll);
@@ -179,3 +190,7 @@ plotType1Correct(targetDiscriminationDataAll);
 
 % Plot the percentage correct for Type 2
 plotType2Correct(betTPIntervalDataAll);
+
+
+
+
